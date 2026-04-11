@@ -1,26 +1,22 @@
 ## Install Tools
 ```
-brew install kubectl helm docker go ko vcluster cilium-cli krew k9s yq helmfile
+brew install kubectl helm docker cilium-cli k9s yq helmfile colima qemu lima-additional-guestagents
 ```
 
-## Install Orbstack
+## Start Colima
 ```
-brew install --cask orbstack
-
-# Add local registries that will be created later
-# Add registry to docker daemon in ~/.docker/daemon.json
-{
-  "insecure-registries": ["localhost:5050"]
-}
-
-# Start Orbstack
+# Start Colima
+colima start --memory 4 --cpu 2 --disk 20 --arch x86_64 --vm-type qemu
 ```
 
 ## Configure docker
 ```
-docker context use orbstack
-export DOCKER_HOST="unix:///Users/mua0008/.orbstack/run/docker.sock"
+docker context use colima
+export DOCKER_HOST="unix://$HOME/.colima/docker.sock"
 docker context list
+
+# Verify
+docker ps
 ```
 
 ## Create your first vcluster
@@ -41,16 +37,6 @@ cilium status --namespace cilium
 
 # Note: Make sure to configure the CNI plugin according to your cluster's pod CIDR
 kubectl get configmap cilium-config -n cilium -o yaml | grep -i cidr
-```
-
-## Configure Registry for first cluster
-```
-# Start a local registry on the same Docker network as your vind cluster
-docker run -d --name registry-1 --network vind-cluster-1 -p 5050:5000 registry:2
-
-# Configure registry for cluster-1 so that nodes can pull from insecure registry
-chmod +x ./cluster-1-script.sh
-./cluster-1-script.sh
 ```
 
 ## Install cert-manager, various components need it
