@@ -17,3 +17,7 @@ This simulator pretends to be a vLLM server serving a model called simulator. Th
 ### Install InferenceScheduler
 
 [./inference-scheduler/README.md](./inference-scheduler/README.md)
+
+### Install Semantic Router
+
+[./vllm-semantic-router/README.md](./vllm-semantic-router/README.md)

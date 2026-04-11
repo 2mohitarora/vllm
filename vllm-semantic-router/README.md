@@ -61,7 +61,7 @@ kubectl logs -n vllm-semantic-router-system -l app.kubernetes.io/name=semantic-r
 
 ```
 
-Client :8080 → Semantic Router (classifies intent)
+Client → Semantic Router (classifies intent)
                     → AgentGateway (traffic mgmt)
                         → EPP (picks best pod)
                             → Simulator Pod (returns response)
