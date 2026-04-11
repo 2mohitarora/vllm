@@ -1,12 +1,12 @@
 ## Install Tools
 ```
-brew install kubectl helm docker cilium-cli k9s yq helmfile colima qemu lima-additional-guestagents
+brew install kubectl helm docker cilium-cli k9s yq helmfile colima
 ```
 
 ## Start Colima
 ```
 # Start Colima
-colima start --memory 4 --cpu 2 --disk 20 --arch x86_64 --vm-type qemu
+colima start --memory 4 --cpu 2 --disk 20 --vmType vz --rosetta true
 ```
 
 ## Configure docker
@@ -16,6 +16,7 @@ export DOCKER_HOST="unix://$HOME/.colima/docker.sock"
 docker context list
 
 # Verify
+docker info | grep Architecture
 docker ps
 ```
 
