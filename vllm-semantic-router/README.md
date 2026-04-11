@@ -8,7 +8,9 @@ helm install semantic-router \
   --create-namespace \
   --set persistence.storageClassName=local-path \
   --set config.classifier.pii_model.pii_mapping_path="models/mom-jailbreak-classifier/jailbreak_type_mapping.json" \
-  -f https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml
+  --set config.classifier.category_model.use_modernbert=true \
+  --set config.classifier.category_model.threshold=0.3 \
+  -f semantic-router-values.yaml
 
 This will take a few minutes — it downloads the ModernBERT classifier model on startup.  
 
@@ -16,47 +18,34 @@ There is a known bug in the Helm chart. The mom-pii-classifier model (which cont
 
 # Verify 
 kubectl get pvc -n vllm-semantic-router-system
+kubectl --namespace vllm-semantic-router-system get pods
 
 # Test the Semantic Router
 
-1. Get the application URL by running these commands:
-  kubectl --namespace vllm-semantic-router-system port-forward $POD_NAME 8080:$CONTAINER_PORT
+1. Get the service IP by running these commands:
+  kubectl --namespace vllm-semantic-router-system get svc
 
 2. Test the Classification API:
   # Health check
-  curl http://localhost:8080/health
+  curl http://192.168.194.149:8080/health
 
   # Intent classification
-  curl -X POST http://localhost:8080/api/v1/classify/intent \
+  curl -X POST http://192.168.194.149:8080/api/v1/classify/intent \
     -H "Content-Type: application/json" \
     -d '{"text": "What is machine learning?"}'
 
+curl -X POST http://192.168.194.149:8080/api/v1/classify/intent \
+    -H "Content-Type: application/json" \
+    -d '{"text": "What is the derivative of x^3?"}'   
+
 3. Access metrics:
-  kubectl --namespace vllm-semantic-router-system port-forward svc/semantic-router-metrics 9190:9190
-  curl http://localhost:9190/metrics
-
-4. Access gRPC API:
-  kubectl --namespace vllm-semantic-router-system port-forward svc/semantic-router 50051:50051
+  curl http://192.168.194.198:9190/metrics
 
 ```
 
-## Update the Semantic Router's backend config to point to your inference pipeline
+## Update the Semantic Router's backend config to point to your inference pipeline. Also explain why we downloaded the file
 ```
-kubectl edit configmap semantic-router-config -n vllm-semantic-router-system
-
-Find the backend_refs section and change the endpoint:
-
-models:
-      - backend_refs:
-        - endpoint: inference-gateway-istio.gateway-system.svc.cluster.local:80
-          name: local-vllm
-          weight: 1
-        name: base-model
-        reasoning_family: qwen3
-
-Save and exit. Then restart the Semantic Router pod to pick up the new config:
-
-kubectl rollout restart deployment/semantic-router -n vllm-semantic-router-system
+ # We downloaded this file: https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml 
 
 Send the request and check the Semantic Router logs to see if it classified the request
 
