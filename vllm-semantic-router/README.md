@@ -11,6 +11,27 @@ helm install semantic-router \
 This will take a few minutes — it downloads the ModernBERT classifier model on startup.  
 ```
 
+## Update the Semantic Router's backend config to point to your inference pipeline
+```
+kubectl edit configmap semantic-router-config -n vllm-semantic-router-system
+
+Find the backend_refs section and change the endpoint:
+
+models:
+      - backend_refs:
+        - endpoint: inference-gateway-istio.gateway-system.svc.cluster.local:80
+          name: local-vllm
+          weight: 1
+        name: base-model
+        reasoning_family: qwen3
+
+Save and exit. Then restart the Semantic Router pod to pick up the new config:
+
+kubectl rollout restart deployment/semantic-router -n vllm-semantic-router-system
+```
+# Test the Semantic Router
+
+```
 1. Get the application URL by running these commands:
   kubectl --namespace vllm-semantic-router-system port-forward $POD_NAME 8080:$CONTAINER_PORT
 
@@ -30,32 +51,7 @@ This will take a few minutes — it downloads the ModernBERT classifier model on
 4. Access gRPC API:
   kubectl --namespace vllm-semantic-router-system port-forward svc/semantic-router 50051:50051
 
-
-kubectl edit configmap semantic-router-config -n vllm-semantic-router-system
-
-Find this block
-
-models:
-      - backend_refs:
-        - endpoint: vllm-llama3-8b-instruct.default.svc.cluster.local:8000
-          name: local-vllm
-          weight: 1
-        name: base-model
-        reasoning_family: qwen3
-
-Change the endpoint to your AgentGateway service:
-
-models:
-      - backend_refs:
-        - endpoint: inference-gateway.agentgateway-system.svc.cluster.local:80
-          name: local-vllm
-          weight: 1
-        name: base-model
-        reasoning_family: qwen3
-
-Save and exit. Then restart the Semantic Router pod to pick up the new config:
-
-kubectl rollout restart deployment/semantic-router -n vllm-semantic-router-system
+```
 
 Client :8080 → Semantic Router (classifies intent)
                     → AgentGateway (traffic mgmt)
