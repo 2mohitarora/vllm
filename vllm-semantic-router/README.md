@@ -25,19 +25,19 @@ kubectl --namespace vllm-semantic-router-system get pods
 
 2. Test the Classification API:
   # Health check
-  curl http://192.168.194.149:8080/health
+  curl http://192.168.194.234:8080/health
 
   # Intent classification
-  curl -X POST http://192.168.194.149:8080/api/v1/classify/intent \
+  curl -X POST http://192.168.194.234:8080/api/v1/classify/intent \
     -H "Content-Type: application/json" \
     -d '{"text": "What is machine learning?"}'
 
-curl -X POST http://192.168.194.149:8080/api/v1/classify/intent \
+curl -X POST http://192.168.194.234:8080/api/v1/classify/intent \
     -H "Content-Type: application/json" \
     -d '{"text": "What is the derivative of x^3?"}'   
 
 3. Access metrics:
-  curl http://192.168.194.198:9190/metrics
+  curl http://192.168.194.216:9190/metrics
 
 ```
 
@@ -45,10 +45,8 @@ curl -X POST http://192.168.194.149:8080/api/v1/classify/intent \
 ```
  # We downloaded this file: https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml 
 
- # We made 3 changes to the file:
- 1. config.classifier.category_model.use_modernbert=true 
- 2. config.classifier.category_model.threshold=0.3
- 3. inference-gateway-istio.gateway-system.svc.cluster.local:80
+ # We made 1 changes to the file:
+ 1. inference-gateway-istio.gateway-system.svc.cluster.local:80
 
 Send the request and check the Semantic Router logs to see if it classified the request
 
