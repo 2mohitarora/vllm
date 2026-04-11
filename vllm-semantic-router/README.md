@@ -57,11 +57,25 @@ curl http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
 
-kubectl logs -n vllm-semantic-router-system -l app.kubernetes.io/name=semantic-router --tail=20   
+# Semantic Router logs — see the classification happening
+kubectl logs -n vllm-semantic-router-system -l app.kubernetes.io/name=semantic-router --tail=30
+
+# EPP logs — see the routing decision
+kubectl logs -n $NAMESPACE -l app.kubernetes.io/name=sim-pool-epp --tail=20
 
 ```
-
 Client → Semantic Router (classifies intent)
                     → AgentGateway (traffic mgmt)
                         → EPP (picks best pod)
                             → Simulator Pod (returns response)
+
+Client sends "What is the derivative of x^3?"
+  → Istio Envoy receives request
+    → ExtProc calls Semantic Router
+      → Classifies as "math" domain ✓
+      → Selects math-expert LoRA ✓  
+      → Injects math system prompt ✓
+      → Returns modified headers to Envoy
+    → Envoy routes via HTTPRoute → InferencePool
+      → EPP picks best simulator pod
+        → Simulator returns fake response (ignores everything above)
