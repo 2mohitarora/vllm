@@ -7,20 +7,12 @@ helm install semantic-router \
   --namespace vllm-semantic-router-system \
   --create-namespace \
   --set persistence.storageClassName=local-path \
+  --set config.classifier.pii_model.pii_mapping_path="models/mom-jailbreak-classifier/jailbreak_type_mapping.json" \
   -f https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml
 
 This will take a few minutes — it downloads the ModernBERT classifier model on startup.  
 
-There is a known bug in the Helm chart. The mom-pii-classifier model (which contains pii_type_mapping.json) is a separate HuggingFace model repo that the chart references but never downloads. The chart only downloads pii_classifier_modernbert-base_presidio_token_model (the weights), not mom-pii-classifier (the mapping file).
-
-# Disable PII detection in the ConfigMap to move forward
-
-kubectl edit configmap semantic-router-config -n vllm-semantic-router-system
-
-# Add enabled: false under pii_model:
-
-# Restart
-kubectl rollout restart deployment/semantic-router -n vllm-semantic-router-system
+There is a known bug in the Helm chart. The mom-pii-classifier model (which contains pii_type_mapping.json) is a separate HuggingFace model repo that the chart references but never downloads. The chart only downloads pii_classifier_modernbert-base_presidio_token_model (the weights), not mom-pii-classifier (the mapping file). That's why we did override pii_model.pii_mapping_path to a wrong file that exists to avoid the error.
 
 # Verify 
 kubectl get pvc -n vllm-semantic-router-system
