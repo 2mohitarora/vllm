@@ -32,7 +32,7 @@ kubectl get gateway -n gateway-system
 ## Create EnvoyFilter to plug in Semantic Router (Semantic rounter will be created later)
 
 ```
-kubectl apply -f semantic-router-envoyfilter.yaml
+kubectl apply -f 02-semantic-router-envoyfilter.yaml
 
 # What this does: Inserts the Semantic Router as an ExtProc filter into the Envoy proxy that Istio created for your inference-gateway. Every request now flows through the Semantic Router's classification pipeline before being routed to the EPP and simulator pods.
 

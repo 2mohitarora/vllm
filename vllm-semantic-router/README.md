@@ -51,6 +51,14 @@ kubectl rollout restart deployment/semantic-router -n vllm-semantic-router-syste
 4. Access gRPC API:
   kubectl --namespace vllm-semantic-router-system port-forward svc/semantic-router 50051:50051
 
+5.  Send the request and check the Semantic Router logs to see if it classified the request
+
+curl http://192.168.97.254/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
+
+kubectl logs -n vllm-semantic-router-system -l app.kubernetes.io/name=semantic-router --tail=20   
+
 ```
 
 Client :8080 → Semantic Router (classifies intent)
