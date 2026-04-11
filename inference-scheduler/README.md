@@ -18,24 +18,40 @@ helm install sim-pool \
   --set inferencePool.modelServers.matchLabels.app=llm-d-sim \
   --set inferencePool.targetPortNumber=8000 \
   --dependency-update \
-  --set experimentalHttpRoute.enabled=true \
-  --version v1.4.0 \
-  --set nodeSelector."kubernetes\.io/arch"=amd64
+  --version v1.4.0
 
 ```
 
 What this just created:
 
-An InferencePool custom resource that says "look for pods with label app=llm-d-sim on port 8000"
-An EPP Deployment (a Go binary) that watches those pods, collects their load/cache metrics, and makes routing decisions
-A Service for the EPP's gRPC endpoint that the Gateway will call for each incoming request  
+- An InferencePool custom resource that says "look for pods with label app=llm-d-sim on port 8000"
+- An EPP Deployment (a Go binary) that watches those pods, collects their load/cache metrics, and makes routing decisions
+- A Service for the EPP's gRPC endpoint that the Gateway will call for each incoming request  
 
 ## Verify
 
 ```
 kubectl get inferencepool -n llm-d -o yaml
 
-kubectl get httproute llm-d-sim -n llm-d -o yaml
+kubectl get svc -n llm-d
+```
+
+## Create HTTPRoute to point to InferencePool
+
+```
+kubectl apply -f sim-http-route.yaml
+```
+
+## Verify the HTTPRoute
+
+```
+kubectl get httproute -n llm-d -o yaml
+
+curl http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"simulator","messages":[{"role":"user","content":"Hello"}]}'
+
+If you get a streamed response back, you've got the full flow working: Client → AgentGateway → EPP (smart routing) → Simulator Pod  
 ```
 
 ## Deploy InferenceObjective (Optional)
