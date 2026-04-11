@@ -6,13 +6,6 @@ brew install kubectl helm docker cilium-cli k9s
 ## Install Orbstack
 ```
 brew install --cask orbstack
-
-# Add local registries that will be created later
-# Add registry to docker daemon in ~/.docker/daemon.json
-{
-  "insecure-registries": ["localhost:5050"]
-}
-
 # Start Orbstack
 ```
 
