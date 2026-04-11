@@ -47,7 +47,7 @@ kubectl apply -f sim-http-route.yaml
 ```
 kubectl get httproute -n llm-d -o yaml
 
-curl http://localhost:8080/v1/chat/completions \
+curl http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"simulator","messages":[{"role":"user","content":"Hello"}]}'
 
