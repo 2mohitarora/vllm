@@ -8,5 +8,5 @@ spec:
       requests:
         - name: gpu
           exactly:
-            deviceClassName: gpu.walmart.com
+            deviceClassName: gpu.example.com
             count: 1
