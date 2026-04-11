@@ -79,3 +79,33 @@ Client sends "What is the derivative of x^3?"
     → Envoy routes via HTTPRoute → InferencePool
       → EPP picks best simulator pod
         → Simulator returns fake response (ignores everything above)
+
+
+ ## Add OpenAI as an option as well
+
+ ```
+# Update the routing decisions to use OpenAI for complex queries. For example, find math_decision and change its modelRefs to point to OpenAI:
+
+- description: Mathematics and quantitative reasoning
+        modelRefs:
+        - model: openai-gpt4
+          lora_name: math-expert
+          use_reasoning: true
+        name: math_decision
+
+kubectl set env deployment/semantic-router \
+  -n vllm-semantic-router-system \
+  OPENAI_API_KEY=sk-your-key-here
+
+kubectl rollout restart deployment/semantic-router -n vllm-semantic-router-system  
+
+# This should route to OpenAI (math domain)
+curl http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
+
+# This should route to local simulator (general domain)
+curl http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"base-model","messages":[{"role":"user","content":"Hello, how are you?"}]}'
+ ```       
