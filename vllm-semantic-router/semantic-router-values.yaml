@@ -1,6 +1,10 @@
 config:
   version: v0.3
   listeners: []
+  classifier:
+    category_model:
+      use_modernbert: true
+      threshold: 0.3
   providers:
     defaults:
       default_model: general-expert

@@ -8,8 +8,6 @@ helm install semantic-router \
   --create-namespace \
   --set persistence.storageClassName=local-path \
   --set config.classifier.pii_model.pii_mapping_path="models/mom-jailbreak-classifier/jailbreak_type_mapping.json" \
-  --set config.classifier.category_model.use_modernbert=true \
-  --set config.classifier.category_model.threshold=0.3 \
   -f semantic-router-values.yaml
 
 This will take a few minutes — it downloads the ModernBERT classifier model on startup.  
@@ -46,6 +44,11 @@ curl -X POST http://192.168.194.149:8080/api/v1/classify/intent \
 ## Update the Semantic Router's backend config to point to your inference pipeline. Also explain why we downloaded the file
 ```
  # We downloaded this file: https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml 
+
+ # We made 3 changes to the file:
+ 1. config.classifier.category_model.use_modernbert=true 
+ 2. config.classifier.category_model.threshold=0.3
+ 3. inference-gateway-istio.gateway-system.svc.cluster.local:80
 
 Send the request and check the Semantic Router logs to see if it classified the request
 
