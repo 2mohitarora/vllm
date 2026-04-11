@@ -21,3 +21,7 @@ This simulator pretends to be a vLLM server serving a model called simulator. Th
 ### Install Semantic Router
 
 [./vllm-semantic-router/README.md](./vllm-semantic-router/README.md)
+
+### Install DRA
+
+[./dra/README.md](./dra/README.md)
