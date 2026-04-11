@@ -18,6 +18,7 @@ helm install sim-pool \
   --set inferencePool.modelServers.matchLabels.app=llm-d-sim \
   --set inferencePool.targetPortNumber=8000 \
   --dependency-update \
+  --set provider.name=istio \
   --version v1.4.0
 
 ```

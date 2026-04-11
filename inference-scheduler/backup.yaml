@@ -19,7 +19,7 @@ metadata:
 spec:
   parentRefs:
     - name: inference-gateway
-      namespace: agentgateway-system
+      namespace: gateway-system
   rules:
     - matches:
         - path:

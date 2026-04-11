@@ -4,9 +4,9 @@
 
 [./k8s/README.md](./k8s/README.md)
 
-### Install AgentGateway
+### Install Istio Gateway with Inference Extension
 
-[./agentgateway/README.md](./agentgateway/README.md)
+[./gateway/README.md](./gateway/README.md)
 
 ### Install vLLM simulator published by llm-d
 
