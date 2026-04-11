@@ -1,14 +1,18 @@
 ## Install Tools
 ```
-brew install kubectl helm docker k9s
+brew install kubectl helm docker k9s istioctl
 ```
 
 ## Install Orbstack
 ```
 brew install --cask orbstack
 
-# Start Orbstack
-# Enable k8s on Orbstack
+orb config set rosetta false
+orb config set k8s.enable true
+orbctl stop
+
+# Start Orbstack and Mark sure rosetta config is disabled and k8s is enabled
+
 ```
 
 ## Configure docker
@@ -18,17 +22,18 @@ export DOCKER_HOST="unix:///Users/mua0008/.orbstack/run/docker.sock"
 docker context list
 ```
 
-## Configure kubectl
+## Configure Kubeconfig
 ```
 kubectl config use-context orbstack
 ```
 
 ## Install cert-manager, various components need it
 ```
+# Install cert-manager
+
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
-# Install cert-manager
 helm install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
   --create-namespace \
