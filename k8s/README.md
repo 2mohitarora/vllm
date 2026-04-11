@@ -1,23 +1,26 @@
 ## Install Tools
 ```
-brew install kubectl helm docker cilium-cli k9s yq helmfile colima
+brew install kubectl helm docker cilium-cli k9s
 ```
 
-## Start Colima
+## Install Orbstack
 ```
-# Start Colima
-colima start --memory 4 --cpu 2 --disk 20 --vmType vz --rosetta true
+brew install --cask orbstack
+
+# Add local registries that will be created later
+# Add registry to docker daemon in ~/.docker/daemon.json
+{
+  "insecure-registries": ["localhost:5050"]
+}
+
+# Start Orbstack
 ```
 
 ## Configure docker
 ```
-docker context use colima
-export DOCKER_HOST="unix://$HOME/.colima/docker.sock"
+docker context use orbstack
+export DOCKER_HOST="unix:///Users/mua0008/.orbstack/run/docker.sock"
 docker context list
-
-# Verify
-docker info | grep Architecture
-docker ps
 ```
 
 ## Create your first vcluster
