@@ -1,4 +1,4 @@
-![alt text](image-1.png)
+![alt text](./assets/training.png)
 
 ## Training
 
@@ -28,9 +28,6 @@ The two core open-source projects that make this work
   - Point to their dataset
   - Monitor their job's logs + metrics
   - Download checkpoints when done
-
-## How Kueue solves multi-tenancy
-![alt text](image-2.png)  
 
 ## The recommended open-source stack
 
