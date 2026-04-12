@@ -22,7 +22,8 @@ cd dra-example-driver
 
 helm install dra-example-driver deployments/helm/dra-example-driver \
   --namespace dra-example-driver \
-  --create-namespace
+  --create-namespace \
+  --set driverName="gpu.walmart.com"
 
 # Verify
 kubectl get pod -n dra-example-driver
