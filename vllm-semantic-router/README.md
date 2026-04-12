@@ -68,42 +68,22 @@ kubectl get svc -n gateway-system
 
 curl -v http://192.168.139.2/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "x-model-name: simulator" \
-  -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
+  -d '{"model":"MoM","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
 ```
 
-
-------------------
-Send the request and check the Semantic Router logs to see if it classified the request
-
-curl http://192.168.97.254/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
-
-# Semantic Router logs — see the classification happening
-kubectl logs -n vllm-semantic-router-system -l app.kubernetes.io/name=semantic-router --tail=30
-
-# EPP logs — see the routing decision
-kubectl logs -n $NAMESPACE -l app.kubernetes.io/name=sim-pool-epp --tail=20
-
+## What is happening
 ```
-Client → Semantic Router (classifies intent)
-                    → AgentGateway (traffic mgmt)
-                        → EPP (picks best pod)
-                            → Simulator Pod (returns response)
-
 Client sends "What is the derivative of x^3?"
-  → Istio Envoy receives request
+  → Istio Gateway's Envoy receives request
     → ExtProc calls Semantic Router
       → Classifies as "math" domain ✓
       → Selects math-expert LoRA ✓  
       → Injects math system prompt ✓
-      → Returns modified headers to Envoy
-    → Envoy routes via HTTPRoute → InferencePool
-      → EPP picks best simulator pod
-        → Simulator returns fake response (ignores everything above)
-
-
+      → Returns modified headers and body to Envoy
+    → Envoy routes via HTTPRoute based on header match → InferencePool
+      → EPP picks best model pod
+        → Model pod returns the response
+```
  ## Add OpenAI as an option as well
 
  ```
