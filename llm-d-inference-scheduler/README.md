@@ -4,7 +4,7 @@ Inference Extension (EPP) is an upstream Kubernetes SIG project `(kubernetes-sig
 
 ## Creating the InferencePool + EPP that routes traffic to pods serving the model
 
-This is the smart routing layer. It has two parts:
+*LLM-D* uses an API resource called InferencePool alongwith a scheduler (referred to as the LLM-D inference scheduler and sometimes equivalently as EndPoint Picker/ EPP). This is the smart routing layer. It has two parts:
 
 - InferencePool — a custom resource that tells the EPP "find all pods matching these labels, they're serving this model"
 - EPP (Endpoint Picker Proxy) — the actual process that receives requests from the Gateway, picks the best pod, and forwards the request
