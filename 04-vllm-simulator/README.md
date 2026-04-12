@@ -8,6 +8,8 @@ kubectl apply -f 00-namespace.yaml
 
 ```
 kubectl apply -f 01-resource-claim-template.yaml
+
+kubectl get resourceclaimtemplate -n vllm-simulator
 ```
 
 ## Install fake vLLM
