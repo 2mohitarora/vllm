@@ -69,7 +69,7 @@ curl -v http://192.168.139.2/v1/chat/completions \
   -H "x-model-name: simulator" \
   -d '{"model":"base-model","messages":[{"role":"user","content":"Hello"}]}'
 
-If you get a streamed response back, you've got the full flow working: Client → AgentGateway → EPP (smart routing) → Simulator Pod  
+If you get a streamed response back, you've got the full flow working: Client → Istio Gateway → EPP (smart routing) → Simulator Pod  
 
 Few things to note:
 
