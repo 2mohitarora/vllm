@@ -47,7 +47,7 @@ DRA, which graduated to beta in k8s 1.32, is essentially a rethink of how Kubern
 
 DRA is a Kubernetes extension that moves resource management out of the kubelet and into user-space controllers. Instead of the kubelet directly allocating devices, the scheduler makes a request to a DRA controller, which then allocates the resource and configures the node. This lets you build custom allocation logic that understands topology, sharing, and vendor-specific features.
 
-![Device Plugin vs DRA](assets/device_plugin_vs_dra.png)
+![Device Plugin vs DRA](../assets/device_plugin_vs_dra.png)
 
 ## Key Differences
 
