@@ -59,15 +59,15 @@ Client request (OpenAI-compatible)
 | **Istio Gateway (Envoy)** | Entry point. TLS, auth, HTTPRoutes. Hosts both ExtProc filters. | Does not understand models or make inference decisions |
 | **Semantic Router** | Classifies intent, picks model/provider, rewrites request, caching, safety. Runs as ExtProc filter inside Gateway's Envoy. | Does not route to specific pods. Does not run standalone — needs Envoy. |
 | **EPP / Inference Scheduler** | Picks the optimal pod within an InferencePool based on metrics. Runs as ExtProc filter inside Gateway's Envoy. | Does not pick which model to use. Does not route to external providers. |
-| **llm-d** | Orchestration framework — Helm charts + configs that wire Gateway + EPP + vLLM together. Adds advanced scheduling plugins (P/D disagg, KV-cache, LoRA-aware). | Not a single binary. Does not route to external providers. |
+| **llm-d** | Helm charts + configs that wire Gateway + EPP + vLLM together. Adds advanced scheduling plugins (P/D disagg, KV-cache, LoRA-aware). | Not a single binary. Does not route to external providers. |
 | **vLLM** | Runs the actual model, generates tokens, serves OpenAI API, reports metrics. | Does not route, schedule, or classify. |
 | **DRA** | Allocates GPU devices to pods using CEL expressions (K8s 1.34+). | Not available on Mac (no GPU driver). |
 
 ## Request flow in detail
 
-1. **Client** sends `POST /v1/chat/completions` with `"model": "MoM"` to the Gateway
+1. **Client** sends `POST /v1/chat/completions` with `"model": "auto"` to the Gateway
 2. **Gateway (Envoy)** receives the request and runs the ExtProc filter chain:
-   - **Filter 1 (Semantic Router)**: reads the body, classifies "this is a math query", rewrites `"model": "MoM"` → `"model": "Qwen/Qwen3-0.6B"`, injects math system prompt, returns modified request to Envoy
+   - **Filter 1 (Semantic Router)**: reads the body, classifies "this is a math query", rewrites `"model": "auto"` → `"model": "Qwen/Qwen3-0.6B"`, injects math system prompt, returns modified request to Envoy
    - **Filter 2 (EPP)**: reads the model name, looks up the InferencePool for that model, scores available pods by KV-cache utilization + queue depth + prefix-cache match, picks the best pod, sets `x-gateway-destination-endpoint` header
 3. **Gateway (Envoy)** routes the request to the selected vLLM pod via the HTTPRoute → InferencePool
 4. **vLLM pod** runs inference on the GPU/CPU, streams tokens back through the Gateway to the client
