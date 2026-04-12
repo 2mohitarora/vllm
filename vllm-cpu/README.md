@@ -42,3 +42,23 @@ kubectl get inferencepool -n vllm-cpu -o yaml
 kubectl get svc -n vllm-cpu
 
 ```
+
+## Create HTTPRoute to point to CPU InferencePool
+
+```
+kubectl apply -f qwen3-cpu-http-route.yaml
+```
+
+## Verify the HTTPRoute
+
+```
+kubectl get httproute -n vllm-cpu -o yaml
+
+# Get Gateway IP
+kubectl get svc -n gateway-system
+
+curl -v http://192.168.139.2/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "x-model-name: qwen3-cpu" \
+  -d '{"model":"Qwen/Qwen3-0.6B","messages":[{"role":"user","content":"What is 2+2?"}]}'
+```
