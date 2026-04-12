@@ -1,10 +1,10 @@
 # Full LLM inference stack on local Kubernetes
 
-**Stack:** vLLM Semantic Router → Gateway (with Inference Extension EPP) → llm-d ModelService → vLLM (CPU) + DRA
+**Stack: vLLM Semantic Router → Gateway (Istio Gateway using Gateway API implementation of Kubernetes with Inference Extension EPP) → llm-d ModelService → vLLM + DRA**
 
-Single Envoy-based gateway stack.
-Gateway is both the traffic proxy AND llm-d's gateway provider.
-The Inference Gateway Extension (EPP) plugs into the same Envoy proxy for KV-cache-aware routing to vLLM pods.
+- Single Envoy-based gateway stack.
+- Gateway is both the traffic proxy AND llm-d's gateway provider.
+- The Inference Gateway Extension (EPP) plugs into the same Envoy proxy for KV-cache-aware routing to vLLM pods.
 
 ---
 
