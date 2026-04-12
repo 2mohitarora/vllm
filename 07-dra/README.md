@@ -28,7 +28,7 @@ helm install dra-example-driver deployments/helm/dra-example-driver \
   --set driverName="nvidia-gpu"
 
 # Verify
-kubectl get pod -n dra-example-driver
+kubectl get pod -n dra-example-driver -o wide
 
 kubectl get resourceslices (Automatically created by the driver, Cluster Scoped)
 
