@@ -2,19 +2,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: llm-d-sim
-  namespace: llm-d
+  name: vllm-simulator
+  namespace: vllm-simulator
   labels:
-    app: llm-d-sim
+    app: vllm-simulator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: llm-d-sim
+      app: vllm-simulator
   template:
     metadata:
       labels:
-        app: llm-d-sim
+        app: vllm-simulator
     spec:
       #resourceClaims:
       #  - name: gpu
