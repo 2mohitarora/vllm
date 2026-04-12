@@ -5,8 +5,6 @@ experimental:
       - name: worker-1
     loadBalancer:
       enabled: true
-    registryProxy:
-      enabled: false
 # Kubernetes version (optional, defaults to v1.34.0)
 # Specify via: controlPlane.distro.k8s.version
 controlPlane:
