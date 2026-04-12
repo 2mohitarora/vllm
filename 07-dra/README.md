@@ -32,7 +32,11 @@ kubectl get pod -n dra-example-driver -o wide
 
 kubectl get resourceslices (Automatically created by the driver, Cluster Scoped)
 
+kubectl get resourceslices -o yaml
+
 kubectl get deviceclass (Automatically created by the driver, Cluster Scoped : Defines hardware categories)
+
+kubectl get deviceclass -o yaml
 ```
 
 ## Create ResourceClaimTemplate
@@ -47,7 +51,7 @@ kubectl get resourceclaimtemplate -n default
 ```
 kubectl apply -f 02_example_pod.yaml
 
-kubectl get pod dra-test-pod
+kubectl logs dra-test-pod
 
 kubectl describe pod dra-test-pod
 
