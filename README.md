@@ -12,11 +12,11 @@
 
 This simulator pretends to be a vLLM server serving a model called simulator. They expose /v1/chat/completions, /v1/models, /health, and /metrics exactly like real vLLM would. It is used to test the inference scheduler without needing a real GPU.
 
-[./llm-d/README.md](./llm-d/README.md)
+[./vllm-simulator/README.md](./vllm-simulator/README.md)
 
 ### Install InferenceScheduler
 
-[./inference-scheduler/README.md](./inference-scheduler/README.md)
+[./llm-d/inference-scheduler/README.md](./llm-d/inference-scheduler/README.md)
 
 ### Install Semantic Router
 
