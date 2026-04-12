@@ -1,9 +1,34 @@
+# 1. Keep your persistence for the 20Gi models
+persistence:
+  enabled: true
+  storageClassName: local-path
+  size: 20Gi
+
+# 1. Provide a writable scratch space (this stays the same)
+extraVolumes:
+  - name: config-writable-space
+    emptyDir: {}
+
+# 2. THE FIX: Mount the FILE, not the DIR
+extraVolumeMounts:
+  - name: config-writable-space
+    mountPath: /app/config/router-runtime.json # Exact file path
+    subPath: router-runtime.json # Key trick: targets the file only
+
 config:
   version: v0.3
+
+  # 1. CRITICAL FIX: Link local models to the internal family names
+  # This fixes the "TraditionalModernBertClassifier not initialized" error
+  embedding_models:
+    mmbert_model_path: "models/mom-embedding-light"
+    bert_model_path: "models/mom-embedding-light"
+    use_cpu: true
+
   listeners: []
   providers:
     defaults:
-      default_model: general-expert
+      default_model: base-model
       reasoning_families:
         deepseek:
           type: chat_template_kwargs
@@ -25,6 +50,7 @@ config:
           - name: local-vllm
             endpoint: inference-gateway-istio.gateway-system.svc.cluster.local:80
             weight: 1
+
   routing:
     decisions:
       - name: business_decision
@@ -43,8 +69,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a senior business consultant and strategic advisor with expertise in corporate strategy, operations management, financial analysis, marketing, and organizational development. Provide practical, actionable business advice backed by proven methodologies and industry best practices. Consider market dynamics, competitive landscape, and stakeholder interests in your recommendations.
+              system_prompt: You are a senior business consultant and strategic advisor. Provide practical, actionable business advice.
               mode: replace
+
       - name: law_decision
         description: Legal questions and law-related topics
         priority: 10
@@ -61,8 +88,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a knowledgeable legal expert with comprehensive understanding of legal principles, case law, statutory interpretation, and legal procedures across multiple jurisdictions. Provide accurate legal information and analysis while clearly stating that your responses are for informational purposes only and do not constitute legal advice. Always recommend consulting with qualified legal professionals for specific legal matters.
+              system_prompt: You are a knowledgeable legal expert. Provide accurate legal information and analysis.
               mode: replace
+
       - name: psychology_decision
         description: Psychology and mental health topics
         priority: 10
@@ -80,6 +108,7 @@ config:
             configuration:
               enabled: true
               similarity_threshold: 0.8
+
       - name: biology_decision
         description: Biology and life sciences questions
         priority: 10
@@ -96,8 +125,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a biology expert with comprehensive knowledge spanning molecular biology, genetics, cell biology, ecology, evolution, anatomy, physiology, and biotechnology. Explain biological concepts with scientific accuracy, use appropriate terminology, and provide examples from current research. Connect biological principles to real-world applications and emphasize the interconnectedness of biological systems.
+              system_prompt: You are a biology expert. Explain biological concepts with scientific accuracy.
               mode: replace
+
       - name: chemistry_decision
         description: Chemistry and chemical sciences questions
         priority: 10
@@ -114,8 +144,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a chemistry expert specializing in chemical reactions, molecular structures, and laboratory techniques. Provide detailed, step-by-step explanations.
+              system_prompt: You are a chemistry expert specializing in chemical reactions.
               mode: replace
+
       - name: history_decision
         description: Historical questions and cultural topics
         priority: 10
@@ -132,8 +163,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a historian with expertise across different time periods and cultures. Provide accurate historical context and analysis.
+              system_prompt: You are a historian. Provide accurate historical context and analysis.
               mode: replace
+
       - name: health_decision
         description: Health and medical information queries
         priority: 10
@@ -151,6 +183,7 @@ config:
             configuration:
               enabled: true
               similarity_threshold: 0.8
+
       - name: economics_decision
         description: Economics and financial topics
         priority: 10
@@ -167,8 +200,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are an economics expert with deep understanding of microeconomics, macroeconomics, econometrics, financial markets, monetary policy, fiscal policy, international trade, and economic theory. Analyze economic phenomena using established economic principles, provide data-driven insights, and explain complex economic concepts in accessible terms. Consider both theoretical frameworks and real-world applications in your responses.
+              system_prompt: You are an economics expert. Analyze economic phenomena using established principles.
               mode: replace
+
       - name: math_decision
         description: Mathematics and quantitative reasoning
         priority: 10
@@ -185,8 +219,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a mathematics expert. Provide step-by-step solutions, show your work clearly, and explain mathematical concepts in an understandable way.
+              system_prompt: You are a mathematics expert. Provide step-by-step solutions.
               mode: replace
+
       - name: physics_decision
         description: Physics and physical sciences
         priority: 10
@@ -203,8 +238,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a physics expert with deep understanding of physical laws and phenomena. Provide clear explanations with mathematical derivations when appropriate.
+              system_prompt: You are a physics expert with deep understanding of physical laws.
               mode: replace
+
       - name: computer_science_decision
         description: Computer science and programming
         priority: 10
@@ -221,8 +257,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a computer science expert with knowledge of algorithms, data structures, programming languages, and software engineering. Provide clear, practical solutions with code examples when helpful.
+              system_prompt: You are a computer science expert. Provide clear, practical solutions.
               mode: replace
+
       - name: philosophy_decision
         description: Philosophy and ethical questions
         priority: 10
@@ -239,8 +276,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a philosophy expert with comprehensive knowledge of philosophical traditions, ethical theories, logic, metaphysics, epistemology, political philosophy, and the history of philosophical thought. Engage with complex philosophical questions by presenting multiple perspectives, analyzing arguments rigorously, and encouraging critical thinking. Draw connections between philosophical concepts and contemporary issues while maintaining intellectual honesty about the complexity and ongoing nature of philosophical debates.
+              system_prompt: You are a philosophy expert. Engage with complex philosophical questions.
               mode: replace
+
       - name: engineering_decision
         description: Engineering and technical problem-solving
         priority: 10
@@ -257,8 +295,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are an engineering expert with knowledge across multiple engineering disciplines including mechanical, electrical, civil, chemical, software, and systems engineering. Apply engineering principles, design methodologies, and problem-solving approaches to provide practical solutions. Consider safety, efficiency, sustainability, and cost-effectiveness in your recommendations. Use technical precision while explaining concepts clearly, and emphasize the importance of proper engineering practices and standards.
+              system_prompt: You are an engineering expert. Apply engineering principles to provide practical solutions.
               mode: replace
+
       - name: thinking_decision
         description: Complex reasoning and multi-step thinking
         priority: 20
@@ -275,8 +314,9 @@ config:
           - type: system_prompt
             configuration:
               enabled: true
-              system_prompt: You are a thinking expert, should think multiple steps before answering. Please answer the question step by step.
+              system_prompt: You are a thinking expert. Please answer the question step by step.
               mode: replace
+
       - name: general_decision
         description: General knowledge and miscellaneous topics
         priority: 1
@@ -285,6 +325,11 @@ config:
           conditions:
             - type: domain
               name: other
+            # Forces the router to calculate embedding confidence for intents
+            - type: classification
+              name: confidence
+              operator: GTE
+              value: 0
         modelRefs:
           - model: base-model
             lora_name: general-expert
@@ -294,123 +339,53 @@ config:
             configuration:
               enabled: true
               similarity_threshold: 0.75
+
     signals:
       keywords:
         - category: thinking
           operator: OR
-          keywords:
-            - urgent
-            - immediate
-            - asap
-            - think
-            - careful
+          keywords: [urgent, immediate, asap, think, careful]
           case_sensitive: false
       domains:
-        - name: business
-          description: Business, corporate strategy, management, finance, marketing
-        - name: law
-          description: Legal principles, case law, statutory interpretation, legal procedures
-        - name: psychology
-          description: Cognitive processes, behavioral patterns, mental health, developmental psychology
-        - name: biology
-          description: Molecular biology, genetics, cell biology, ecology, evolution, anatomy
-        - name: chemistry
-          description: Chemical reactions, molecular structures, laboratory techniques
-        - name: history
-          description: Historical events, time periods, cultures, civilizations
-        - name: health
-          description: Anatomy, physiology, diseases, treatments, preventive care, nutrition
-        - name: economics
-          description: Microeconomics, macroeconomics, financial markets, monetary policy, trade
-        - name: math
-          description: Mathematics, algebra, calculus, geometry, statistics
-        - name: physics
-          description: Physical laws, mechanics, thermodynamics, electromagnetism, quantum physics
-        - name: computer science
-          description: Algorithms, data structures, programming, software engineering
-        - name: philosophy
-          description: Philosophical traditions, ethics, logic, metaphysics, epistemology
-        - name: engineering
-          description: Engineering disciplines, design, problem-solving, systems
-        - name: other
-          description: General knowledge and miscellaneous topics
+        - { name: business, description: "Business, finance, marketing" }
+        - { name: law, description: "Legal principles, case law" }
+        - { name: psychology, description: "Mental health, behavior" }
+        - { name: biology, description: "Biology, life sciences" }
+        - { name: chemistry, description: "Chemical reactions" }
+        - { name: history, description: "Historical events" }
+        - { name: health, description: "Medical information" }
+        - { name: economics, description: "Macro and micro economics" }
+        - { name: math, description: "Mathematics and logic" }
+        - { name: physics, description: "Physical laws" }
+        - { name: computer science, description: "Programming and CS" }
+        - { name: philosophy, description: "Ethics and logic" }
+        - { name: engineering, description: "Engineering principles" }
+        - { name: other, description: "General knowledge" }
+
     modelCards:
       - name: base-model
         loras:
-          - name: science-expert
-            description: "Specialized for science domains: biology, chemistry, physics, health, engineering"
-          - name: social-expert
-            description: "Optimized for social sciences: business, economics"
-          - name: math-expert
-            description: Fine-tuned for mathematics and quantitative reasoning
-          - name: law-expert
-            description: Specialized for legal questions and law-related topics
-          - name: humanities-expert
-            description: "Optimized for humanities: psychology, history, philosophy"
-          - name: general-expert
-            description: General-purpose adapter for diverse topics
+          - { name: science-expert }
+          - { name: social-expert }
+          - { name: math-expert }
+          - { name: law-expert }
+          - { name: humanities-expert }
+          - { name: general-expert }
       - name: general-expert
+
   global:
     router:
       strategy: priority
     services:
-      response_api:
-        enabled: true
-        store_backend: memory
-        ttl_seconds: 86400
-        max_responses: 1000
-      router_replay:
-        store_backend: memory
-        ttl_seconds: 2592000
-        async_writes: false
       api:
         batch_classification:
           max_batch_size: 100
-          concurrency_threshold: 5
           max_concurrency: 8
-          metrics:
-            enabled: true
-            detailed_goroutine_tracking: true
-            high_resolution_timing: false
-            sample_rate: 1.0
-            duration_buckets:
-              - 0.001
-              - 0.005
-              - 0.01
-              - 0.025
-              - 0.05
-              - 0.1
-              - 0.25
-              - 0.5
-              - 1
-              - 2.5
-              - 5
-              - 10
-              - 30
-            size_buckets:
-              - 1
-              - 2
-              - 5
-              - 10
-              - 20
-              - 50
-              - 100
-              - 200
       observability:
         tracing:
           enabled: false
-          provider: opentelemetry
-          exporter:
-            type: otlp
-            endpoint: jaeger:4317
-            insecure: true
-          sampling:
-            type: always_on
-            rate: 1.0
-          resource:
-            service_name: vllm-semantic-router
-            service_version: v0.1.0
-            deployment_environment: development
+
+    # 2. CRITICAL SYNC: Use 'mmbert' for all stores to match the initialized model
     stores:
       semantic_cache:
         enabled: true
@@ -424,6 +399,7 @@ config:
         embedding_model: mmbert
       vector_store:
         embedding_model: mmbert
+
     integrations:
       tools:
         enabled: true

@@ -1,12 +1,15 @@
 ## Install Semantic Router
 
 ```
-helm install semantic-router \
+helm upgrade --install semantic-router \
   oci://ghcr.io/vllm-project/charts/semantic-router \
   --version 0.2.0 \
   --namespace vllm-semantic-router-system \
   --create-namespace \
-  --set persistence.storageClassName=local-path \
+  --set securityContext.readOnlyRootFilesystem=false \
+  --set podSecurityContext.fsGroup=2000 \
+  --set securityContext.runAsUser=0 \
+  --set securityContext.runAsGroup=0 \
   --set config.classifier.pii_model.pii_mapping_path="models/mom-jailbreak-classifier/jailbreak_type_mapping.json" \
   -f semantic-router-values.yaml
 
