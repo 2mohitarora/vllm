@@ -10,7 +10,7 @@
 
 ### Install Inference Extension and llm-d InferenceScheduler (extension of the EPP)
 
-[./03-gateway-api-inference-extension/README.md](./03-gateway-api-inference-extension/README.md)
+[./03-gateway-api-inferencing-extension/README.md](./03-gateway-api-inferencing-extension/README.md)
 
 ### Install vLLM simulator
 
