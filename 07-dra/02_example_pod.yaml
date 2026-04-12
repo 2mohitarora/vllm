@@ -4,13 +4,13 @@ metadata:
   name: dra-test-pod
 spec:
   resourceClaims:
-    - name: gpu
-      resourceClaimTemplateName: gpu-claim-template
+    - name: nvidia-gpu
+      resourceClaimTemplateName: nvidia-gpu-claim-template
   containers:
     - name: test
       image: busybox
       command: ["echo", "DRA claim worked"]
       resources:
         claims:
-          - name: gpu
+          - name: nvidia-gpu
   restartPolicy: Never
