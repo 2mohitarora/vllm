@@ -1,6 +1,6 @@
 ## Introduction
 
-Inference Extension (EPP) is an upstream Kubernetes SIG project `(kubernetes-sigs/gateway-api-inference-extension)`. It's part of the Gateway API ecosystem, not owned by llm-d. It provides the generic InferencePool CRD and the reference EPP implementation that works with any Envoy-based gateway (Istio, Envoy Gateway, GKE Gateway, NGINX).
+Gateway API Inference Extension (EPP) is an upstream Kubernetes SIG project `(kubernetes-sigs/gateway-api-inference-extension)`. It's part of the Gateway API ecosystem, not owned by llm-d. It provides the generic InferencePool CRD and the reference EPP implementation that works with any Envoy-based gateway (Istio, Envoy Gateway, GKE Gateway, NGINX).
 
 Gateway API Inference Extension optimizes self-hosting Generative Models on Kubernetes. More details can be found here: https://gateway-api-inference-extension.sigs.k8s.io/ 
 
@@ -10,12 +10,24 @@ The overall resource model focuses on 2 new inference-focused personas and corre
 
 *llm-d* builds on top of the Inference Extension. It has its own fork/extension of the EPP `(llm-d/llm-d-inference-scheduler)` that adds llm-d-specific plugins: KV-cache aware routing, disaggregated prefill/decode scheduling, prefix-cache scoring, LoRA-aware routing. These are plugins that plug into the EPP's extensible architecture.
 
+## Important thing to note
+
+Inference Scheduler is *not* a separate pod. It runs inside the EPP pod. They're the same thing, just different names for different layers of the same process.
+
+Think of it this way:
+
+EPP pod (one process, one container)
+├── ExtProc server (gRPC layer — talks to Envoy)
+├── Inference Scheduler (decision logic)
+│   ├── Queue scorer plugin
+│   ├── KV-cache utilization scorer plugin
+│   ├── Prefix-cache scorer plugin
+│   └── (llm-d adds: P/D disaggregation, LoRA-aware routing)
+└── Data layer (watches pods, scrapes metrics)
+
+The EPP is the container/binary — it receives gRPC ExtProc calls from Envoy, processes them, and returns routing decisions. The Inference Scheduler is the decision engine inside the EPP that scores available pods and picks the best one.
+
 ## Creating the InferencePool + EPP that routes traffic to pods serving the model
-
-*LLM-D* uses an API resource called InferencePool alongwith a scheduler (referred to as the LLM-D inference scheduler and sometimes equivalently as EndPoint Picker/ EPP). This is the smart routing layer. It has two parts:
-
-- InferencePool — a custom resource that tells the EPP "find all pods matching these labels, they're serving this model"
-- EPP (Endpoint Picker Proxy) — the actual process that receives requests from the Gateway, picks the best pod, and forwards the request
 
 ```
 # Install Inference Extension CRDs:
@@ -45,13 +57,6 @@ What this just created:
 - An InferencePool custom resource that says "look for pods with label app=vllm-simulator on port 8000"
 - An EPP Deployment (a Go binary) that watches those pods, collects their load/cache metrics, and makes routing decisions
 - A Service for the EPP's gRPC endpoint that the Gateway will call for each incoming request 
-
-## Important Note
-
-If you need to add more models, you can install more InferencePools, each with a different selector to match the pods for that model. Respective EPP deployment and service will be created automatically.
-```
-helm install math-pool    oci://registry.k8s.io/.../inferencepool --set ...matchLabels.app=math-vllm
-```
  
 ## Verify
 
