@@ -62,7 +62,8 @@ K8s resources created per pool:
 
 DRA (K8s 1.34+): DeviceClass + ResourceClaimTemplate attach GPUs to vLLM pods
 
-* ModelService is just a Helm chart — not a runtime component. It's llm-d's opinionated way to deploy vLLM pods with the right configuration.
+* ModelService is just a Helm chart — not a runtime component. 
+* It's llm-d's opinionated way to deploy vLLM pods with the right configuration.
 ```
 
 ## What each component does (and does NOT do)
