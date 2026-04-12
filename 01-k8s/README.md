@@ -6,6 +6,14 @@ brew install kubectl helm docker k9s istioctl vcluster
 ## Install Orbstack
 ```
 brew install --cask orbstack
+
+# Change docker settings in Orbstack
+{
+  "features": {
+    "containerd-snapshotter": true
+  }
+}
+
 # Start Orbstack
 ```
 
