@@ -1,18 +1,12 @@
 ## Install Tools
 ```
-brew install kubectl helm docker k9s istioctl
+brew install kubectl helm docker k9s istioctl vcluster
 ```
 
 ## Install Orbstack
 ```
 brew install --cask orbstack
-
-orb config set rosetta false
-orb config set k8s.enable true
-orbctl stop
-
-# Start Orbstack and Mark sure rosetta config is disabled and k8s is enabled
-
+# Start Orbstack
 ```
 
 ## Configure docker
@@ -22,7 +16,7 @@ export DOCKER_HOST="unix:///Users/mua0008/.orbstack/run/docker.sock"
 docker context list
 ```
 
-## Configure Kubeconfig
+## Create your first vcluster
 ```
-kubectl config use-context orbstack
+sudo vcluster create cluster-1 --driver docker --values cluster-1.yaml
 ```
