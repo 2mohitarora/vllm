@@ -50,10 +50,8 @@ Client request (OpenAI-compatible)
 │  llm-d            │          │  OpenAI API      │
 │  ModelService     │          │  (external)      │
 │  ┌──────────────┐ │          └──────────────────┘
-│  │ vLLM (CPU)   │ │
+│  │ vLLM         │ │
 │  │ Qwen 0.5B    │ │
 │  └──────────────┘ │
-│  DRA: true        │
-│  (simulated GPUs) │
 └──────────────────┘
 ```
