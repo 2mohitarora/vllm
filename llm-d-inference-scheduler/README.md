@@ -15,7 +15,7 @@ The overall resource model focuses on 2 new inference-focused personas and corre
 Inference Scheduler is *not* a separate pod. It runs inside the EPP pod. They're the same thing, just different names for different layers of the same process.
 
 Think of it this way:
-
+```
 EPP pod (one process, one container)
 ├── ExtProc server (gRPC layer — talks to Envoy)
 ├── Inference Scheduler (decision logic)
@@ -24,7 +24,7 @@ EPP pod (one process, one container)
 │   ├── Prefix-cache scorer plugin
 │   └── (llm-d adds: P/D disaggregation, LoRA-aware routing)
 └── Data layer (watches pods, scrapes metrics)
-
+```
 The EPP is the container/binary — it receives gRPC ExtProc calls from Envoy, processes them, and returns routing decisions. The Inference Scheduler is the decision engine inside the EPP that scores available pods and picks the best one.
 
 ## Creating the InferencePool + EPP that routes traffic to pods serving the model
