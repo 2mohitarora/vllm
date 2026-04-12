@@ -4,10 +4,16 @@
 kubectl apply -f 00-namespace.yaml
 ```
 
+## Create resource claim template
+
+```
+kubectl apply -f 01-resource-claim-template.yaml
+```
+
 ## Install fake vLLM
 
 ```
-kubectl apply -f 01-fake-vllm.yaml
+kubectl apply -f 02-fake-vllm.yaml
 ```
 
 ## Quick test (direct pod)
