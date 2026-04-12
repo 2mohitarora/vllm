@@ -35,7 +35,7 @@ Accessing GPU data from the CPU can trigger a Host-Device Synchronization, a com
 
 ## Why this gets complicated for your platform team:
 
-The device plugin model treats GPUs as opaque, countable integers. When a pod says nvidia.com/gpu: 1, it gets a GPU — but you can't express preferences like "I need two GPUs connected by NVLink" or "give me a GPU with 80GB VRAM." 
+The device plugin model treats GPUs as opaque, countable integers. When a pod says `nvidia.com/gpu: 1`, it gets a GPU — but you can't express preferences like "I need two GPUs connected by NVLink" or "give me a GPU with 80GB VRAM." 
 
 There's no topology awareness, no sharing semantics, and no way to do partial allocation (like GPU time-slicing at the scheduler level). 
 
@@ -47,7 +47,7 @@ DRA, which graduated to beta in k8s 1.32, is essentially a rethink of how Kubern
 
 DRA is a Kubernetes extension that moves resource management out of the kubelet and into user-space controllers. Instead of the kubelet directly allocating devices, the scheduler makes a request to a DRA controller, which then allocates the resource and configures the node. This lets you build custom allocation logic that understands topology, sharing, and vendor-specific features.
 
-![Device Plugin vs DRA](image.png)
+![Device Plugin vs DRA](assets/device_plugin_vs_dra.png)
 
 ## Key Differences
 
