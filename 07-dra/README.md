@@ -23,7 +23,7 @@ cd dra-example-driver
 helm install dra-example-driver deployments/helm/dra-example-driver \
   --namespace dra-example-driver \
   --create-namespace \
-  --set driverName="nvidia.com/gpu"
+  --set driverName="nvidia-gpu"
 
 # Verify
 kubectl get pod -n dra-example-driver

@@ -8,5 +8,5 @@ spec:
       requests:
         - name: nvidia-gpu
           exactly:
-            deviceClassName: nvidia.com/gpu
+            deviceClassName: nvidia-gpu
             count: 1
