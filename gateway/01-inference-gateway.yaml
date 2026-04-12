@@ -5,6 +5,9 @@ metadata:
   namespace: gateway-system
 spec:
   gatewayClassName: istio
+  infrastructure:
+    annotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "50051"
   listeners:
     - name: http
       protocol: HTTP

@@ -6,7 +6,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      istio.io/gateway-name: inference-gateway
+      gateway.networking.k8s.io/gateway-name: inference-gateway
   configPatches:
     - applyTo: HTTP_FILTER
       match:
@@ -18,9 +18,9 @@ spec:
               subFilter:
                 name: envoy.filters.http.router
       patch:
-        operation: INSERT_BEFORE
+        operation: INSERT_FIRST
         value:
-          name: envoy.filters.http.ext_proc
+          name: envoy.filters.http.ext_proc.semantic_router
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExternalProcessor
             grpc_service:

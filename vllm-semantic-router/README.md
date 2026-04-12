@@ -14,6 +14,12 @@ This will take a few minutes — it downloads the ModernBERT classifier model on
 
 There is a known bug in the Helm chart. The mom-pii-classifier model (which contains pii_type_mapping.json) is a separate HuggingFace model repo that the chart references but never downloads. The chart only downloads pii_classifier_modernbert-base_presidio_token_model (the weights), not mom-pii-classifier (the mapping file). That's why we did override pii_model.pii_mapping_path to a wrong file that exists to avoid the error.
 
+# Also patch the service after helm install semantic-router. Without appProtocol: grpc, Istio treats port 50051 as plain TCP/HTTP1.1. But ExtProc requires gRPC, which runs over HTTP/2.
+
+kubectl patch svc semantic-router -n vllm-semantic-router-system --type='json' -p='[
+  {"op": "add", "path": "/spec/ports/0/appProtocol", "value": "grpc"}
+]'
+
 # Verify 
 kubectl get pvc -n vllm-semantic-router-system
 kubectl --namespace vllm-semantic-router-system get pods
@@ -47,7 +53,32 @@ curl -X POST http://192.168.194.234:8080/api/v1/classify/intent \
 
  # We made 1 changes to the file:
  1. inference-gateway-istio.gateway-system.svc.cluster.local:80
+```
 
+## Create EnvoyFilter to plug in Semantic Router (Semantic rounter will be created later)
+
+```
+kubectl apply -f 02-semantic-router-envoyfilter.yaml
+
+# What this does: Inserts the Semantic Router as an ExtProc filter into the Envoy proxy that Istio created for your inference-gateway. Every request now flows through the Semantic Router's classification pipeline before being routed to the EPP and simulator pods.
+
+# Verify the EnvoyFilter
+kubectl get envoyfilter -n gateway-system
+
+```
+
+## Send inferencing request via gateway
+
+```
+kubectl get svc -n gateway-system
+
+curl -v http://192.168.139.2/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
+```
+
+
+------------------
 Send the request and check the Semantic Router logs to see if it classified the request
 
 curl http://192.168.97.254/v1/chat/completions \
@@ -108,14 +139,4 @@ curl http://localhost:8080/v1/chat/completions \
  ```       
 
 
- ## Create EnvoyFilter to plug in Semantic Router (Semantic rounter will be created later)
-
-```
-kubectl apply -f 02-semantic-router-envoyfilter.yaml
-
-# What this does: Inserts the Semantic Router as an ExtProc filter into the Envoy proxy that Istio created for your inference-gateway. Every request now flows through the Semantic Router's classification pipeline before being routed to the EPP and simulator pods.
-
-# Verify the EnvoyFilter
-kubectl get envoyfilter -n gateway-system
-
-```
+ 
