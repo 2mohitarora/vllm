@@ -25,19 +25,19 @@ kubectl --namespace vllm-semantic-router-system get pods
 
 2. Test the Classification API:
   # Health check
-  curl http://192.168.194.234:8080/health
+  curl http://192.168.194.240:8080/health
 
   # Intent classification
-  curl -X POST http://192.168.194.234:8080/api/v1/classify/intent \
+  curl -X POST http://192.168.194.240:8080/api/v1/classify/intent \
     -H "Content-Type: application/json" \
     -d '{"text": "What is machine learning?"}'
 
-curl -X POST http://192.168.194.234:8080/api/v1/classify/intent \
+curl -X POST http://192.168.194.240:8080/api/v1/classify/intent \
     -H "Content-Type: application/json" \
     -d '{"text": "What is the derivative of x^3?"}'   
 
 3. Access metrics:
-  curl http://192.168.194.216:9190/metrics
+  curl http://192.168.194.196:9190/metrics
 
 ```
 
@@ -68,6 +68,7 @@ kubectl get svc -n gateway-system
 
 curl -v http://192.168.139.2/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "x-model-name: simulator" \
   -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
 ```
 
