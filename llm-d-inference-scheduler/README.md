@@ -89,3 +89,5 @@ Few things to note:
 
 ## Latency-Based Routing
 
+## Explore more features of llm-d InferenceScheduler
+
