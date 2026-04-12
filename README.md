@@ -4,7 +4,7 @@
 
 [./k8s/README.md](./k8s/README.md)
 
-### Install Istio Gateway with Inference Extension
+### Install Istio Gateway
 
 [./gateway/README.md](./gateway/README.md)
 
@@ -14,13 +14,17 @@ This simulator pretends to be a vLLM server serving a model called simulator. Th
 
 [./vllm-simulator/README.md](./vllm-simulator/README.md)
 
-### Install llm-d InferenceScheduler (extension of the EPP)
+### Install Inference Extension and llm-d InferenceScheduler (extension of the EPP)
 
 [./llm-d-inference-scheduler/README.md](./llm-d-inference-scheduler/README.md)
 
 ### Install Semantic Router
 
 [./vllm-semantic-router/README.md](./vllm-semantic-router/README.md)
+
+### Add another model to the mix running on vllm (CPU)
+
+[./vllm-cpu/README.md](./vllm-cpu/README.md)
 
 ### Install DRA (TRY THIS WHEN Orbstack supports k8s 1.34)
 
