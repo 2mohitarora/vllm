@@ -6,7 +6,7 @@ The flow is:
 - Scheduler reads ResourceSlices — when a pod has a ResourceClaim, the scheduler searches all ResourceSlices for a device matching the DeviceClass selectors and any CEL filters
 - Match found → pod scheduled to that node — the kubelet then calls the DRA driver to attach the device to the pod
 
-![DRA Flow](assets/dra.png)
+![DRA Flow](../assets/dra.png)
 
 ## DRA Example Driver
 
