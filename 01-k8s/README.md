@@ -20,3 +20,10 @@ docker context list
 ```
 sudo vcluster create cluster-1 --driver docker --values ./vcluster/cluster.yaml
 ```
+
+## Verify vcluster
+```
+kubectl get pods --all-namespaces -w
+
+kubectl config get-contexts
+```
