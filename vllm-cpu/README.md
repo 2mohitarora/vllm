@@ -32,8 +32,13 @@ helm install qwen3-cpu-pool \
   --version v1.4.0 \
   --set inferenceExtension.image.hub=ghcr.io/llm-d \
   --set inferenceExtension.image.name=llm-d-inference-scheduler \
-  --set inferenceExtension.image.tag=latest
+  --set inferenceExtension.image.tag=latest \
+  --set inferenceExtension.resources.requests.cpu=50m \
+  --set inferenceExtension.resources.requests.memory=128Mi \
+  --set inferenceExtension.resources.limits.memory=256Mi
 
+kubectl get inferencepool -n vllm-cpu -o yaml
 
-  
+kubectl get svc -n vllm-cpu
+
 ```
