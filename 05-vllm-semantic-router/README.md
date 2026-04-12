@@ -17,35 +17,35 @@ There is a known bug in the Helm chart. The mom-pii-classifier model (which cont
 
 # Verify 
 ```
-kubectl get pvc -n vllm-semantic-router-system
 kubectl --namespace vllm-semantic-router-system get pods
 ```
 
 # Test the Semantic Router
 
 ```
-1. Get the service IP by running these commands:
-  kubectl --namespace vllm-semantic-router-system get svc
+1. Forward port:
+
+  kubectl -n vllm-semantic-router-system port-forward svc/semantic-router 8081:8080
 
 2. Test the Classification API:
 
   # Health check
 
-  curl http://192.168.194.195:8080/health
+  curl http://localhost:8081/health
 
   # Intent classification
 
-  curl -X POST http://192.168.194.195:8080/api/v1/classify/intent \
+  curl -X POST http://localhost:8081/api/v1/classify/intent \
     -H "Content-Type: application/json" \
     -d '{"text": "What is machine learning?"}'
 
-  curl -X POST http://192.168.194.195:8080/api/v1/classify/intent \
+  curl -X POST http://localhost:8081/api/v1/classify/intent \
     -H "Content-Type: application/json" \
     -d '{"text": "What is the derivative of x^3?"}'   
 
 3. Access metrics:
-
-  curl http://192.168.194.171:9190/metrics
+  kubectl -n vllm-semantic-router-system port-forward svc/semantic-router-metrics 9190:9190
+  curl http://localhost:9190/metrics
 ```
 
 ## Explain `semantic-router-values.yaml`

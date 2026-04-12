@@ -14,7 +14,9 @@ kubectl apply -f 01-fake-vllm.yaml
 ```
 kubectl get pods -n vllm-simulator -o wide
 
-curl http://[IP_ADDRESS]/v1/chat/completions \
+kubectl -n vllm-simulator port-forward deployment/vllm-simulator 8000:8000
+
+curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "x-model-name: simulator" \
   -d '{"model":"base-model","messages":[{"role":"user","content":"Hello"}]}'
@@ -67,7 +69,7 @@ kubectl get httproute -n vllm-simulator -o yaml
 # Get Gateway IP
 kubectl get svc -n gateway-system
 
-curl -v http://192.168.139.2/v1/chat/completions \
+curl -v http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "x-model-name: simulator" \
   -d '{"model":"base-model","messages":[{"role":"user","content":"Hello"}]}'
