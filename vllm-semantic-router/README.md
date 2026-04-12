@@ -49,7 +49,7 @@ curl -X POST http://192.168.194.240:8080/api/v1/classify/intent \
  1. inference-gateway-istio.gateway-system.svc.cluster.local:80
 ```
 
-## Create EnvoyFilter to plug in Semantic Router (Semantic rounter will be created later)
+## Create EnvoyFilter to plug in Semantic Router
 
 ```
 kubectl apply -f 02-semantic-router-envoyfilter.yaml
@@ -91,7 +91,7 @@ Client sends "What is the derivative of x^3?"
       → EPP picks best model pod
         → Model pod returns the response
 ```
- ## Add OpenAI as an option as well
+ ## Add OpenAI as an option as well (NOT WORKING: FIX IT)
 
  ```
 # Update the routing decisions to use OpenAI for complex queries. For example, find math_decision and change its modelRefs to point to OpenAI:
