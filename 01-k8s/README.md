@@ -18,5 +18,5 @@ docker context list
 
 ## Create your first vcluster
 ```
-sudo vcluster create cluster-1 --driver docker --values cluster-1.yaml
+sudo vcluster create cluster-1 --driver docker --values ./vcluster/cluster.yaml
 ```
