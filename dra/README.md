@@ -27,9 +27,9 @@ helm install dra-example-driver deployments/helm/dra-example-driver \
 # Verify
 kubectl get pod -n dra-example-driver
 
-kubectl get resourceslices (Automatically created by the driver,Cluster Scoped)
+kubectl get resourceslices (Automatically created by the driver, Cluster Scoped)
 
-kubectl get deviceclass (Automatically created by the driver,Cluster Scoped : Defines hardware categories)
+kubectl get deviceclass (Automatically created by the driver, Cluster Scoped : Defines hardware categories)
 ```
 
 ## Create ResourceClaimTemplate
@@ -46,10 +46,24 @@ kubectl apply -f 02_example_pod.yaml
 
 kubectl get pod dra-test-pod
 
-# It should show Pending — because there's no DRA driver providing ResourceSlices with devices matching gpu.walmart.com
-
 kubectl describe pod dra-test-pod
 
 # Look for the Events section
 ```
 
+## Real world scenarios
+```
+Cover dra-manifests-production.yaml
+```
+
+## NVIDIA DRA driver installation (for real GPUs):
+
+```
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+
+helm install nvidia-dra-driver-gpu nvidia/nvidia-dra-driver-gpu \
+  --version="25.12.0" \
+  --namespace nvidia-dra-driver-gpu --create-namespace \
+  --set nvidiaDriverRoot=/run/nvidia/driver \
+  --set gpuResourcesEnabledOverride=true
+```

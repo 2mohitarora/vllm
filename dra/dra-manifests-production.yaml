@@ -1,0 +1,136 @@
+# ═══════════════════════════════════════════════════════════════
+# DRA Manifests — ready for a real GPU cluster
+#
+# These are the PRODUCTION versions of the DRA resources.
+# Replace "gpu.example.com" with your actual DRA driver name
+# (e.g., "gpu.nvidia.com" for NVIDIA GPUs).
+# ═══════════════════════════════════════════════════════════════
+
+---
+# 1. DeviceClass: Defines what "a GPU" means to the cluster
+#    The DRA driver creates ResourceSlices that match this selector.
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: gpu.nvidia.com
+spec:
+  selectors:
+    # Match only NVIDIA GPUs
+    - cel:
+        expression: "device.driver == \"gpu.nvidia.com\""
+    # Optional: require minimum 80GB memory (H100/A100-80GB)
+    # - cel:
+    #     expression: "device.attributes[\"gpu.nvidia.com\"].memory >= quantity(\"80Gi\")"
+
+---
+# 2. ResourceClaimTemplate for INFERENCE pods
+#    Each vLLM pod gets its own GPU(s)
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: inference-gpu-claim
+  namespace: llm-d
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu
+          deviceClassName: gpu.nvidia.com
+          count: 1  # 1 GPU per inference pod
+
+---
+# 3. ResourceClaimTemplate for TRAINING pods (multi-GPU)
+#    Requests 4 GPUs with NVLink topology constraint
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: training-gpu-claim
+  namespace: llm-d
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpus
+          deviceClassName: gpu.nvidia.com
+          count: 4  # 4 GPUs per training worker
+      constraints:
+        - requests: ["gpus"]
+          matchAttribute: "gpu.nvidia.com/nvlink-domain"
+          # ^ All 4 GPUs must be in the same NVLink domain
+
+---
+# 4. Example: vLLM inference pod using DRA
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vllm-inference-dra
+  namespace: llm-d
+spec:
+  resourceClaims:
+    - name: gpu
+      resourceClaimTemplateName: inference-gpu-claim
+  containers:
+    - name: vllm
+      image: ghcr.io/llm-d/vllm-openai:latest
+      args:
+        - "--model=Qwen/Qwen3-32B"
+        - "--tensor-parallel-size=1"
+        - "--port=8000"
+      ports:
+        - containerPort: 8000
+      resources:
+        claims:
+          - name: gpu
+
+---
+# 5. Example: Distributed training pod using DRA (4 GPUs)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: training-worker-dra
+  namespace: llm-d
+spec:
+  resourceClaims:
+    - name: gpus
+      resourceClaimTemplateName: training-gpu-claim
+  containers:
+    - name: trainer
+      image: pytorch/pytorch:2.4.0-cuda12.4-cudnn9-runtime
+      command: ["torchrun", "--nproc_per_node=4", "train.py"]
+      resources:
+        claims:
+          - name: gpus
+
+---
+# 6. Kueue ClusterQueue with DRA quota accounting
+#    (Requires Kueue with DynamicResourceAllocation feature gate)
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: gpu-cluster-queue
+spec:
+  resourceGroups:
+    - coveredResources: ["cpu", "memory", "example.com/gpu"]
+      flavors:
+        - name: h100-flavor
+          resources:
+            - name: "cpu"
+              nominalQuota: 128
+            - name: "memory"
+              nominalQuota: 512Gi
+            - name: "example.com/gpu"
+              nominalQuota: 16  # 16 DRA GPU allocations total
+  cohort: ai-workloads  # enables quota borrowing
+  preemption:
+    withinClusterQueue: LowerPriority
+    reclaimWithinCohort: Any
+
+---
+# 7. Kueue LocalQueue for a team
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  name: team-alpha-queue
+  namespace: llm-d
+spec:
+  clusterQueue: gpu-cluster-queue

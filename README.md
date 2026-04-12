@@ -22,6 +22,10 @@ This simulator pretends to be a vLLM server serving a model called simulator. Th
 
 [./vllm-semantic-router/README.md](./vllm-semantic-router/README.md)
 
-### Install DRA
+### Install DRA (TRY THIS WHEN Orbstack supports k8s 1.34)
+
+```
+kubectl version -o json | grep -E "gitVersion|platform"
+```
 
 [./dra/README.md](./dra/README.md)
