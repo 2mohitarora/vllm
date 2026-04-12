@@ -10,7 +10,7 @@ The Inference Gateway Extension (EPP) plugs into the same Envoy proxy for KV-cac
 
 ## Architecture
 
-![alt text](assets/inference_architecture.png)
+![alt text](assets/inferencing.png)
 
 ```
 Client request (OpenAI-compatible)
