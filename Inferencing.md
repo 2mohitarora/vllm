@@ -37,7 +37,7 @@ Client request (OpenAI-compatible)
            ▼                               ▼
 ┌────────────────────────────┐  ┌──────────────────────────┐
 │  vLLM Model Server pods    │  │  OpenAI / Anthropic      │
-│  (via llm-d ModelService)  │  │  (external APIs)         │
+│  (via llm-d ModelService*) │  │  (external APIs)         │
 │  • Actual inference        │  │  Semantic Router         │
 │  • OpenAI-compatible API   │  │  forwards directly via   │
 │  • Reports metrics to EPP  │  │  backend_refs config     │
@@ -48,6 +48,8 @@ Client request (OpenAI-compatible)
 │  │ pod 1  │ │ pod 2  │    │
 │  └────────┘ └────────┘    │
 └────────────────────────────┘
+
+* ModelService is just a Helm chart — not a runtime component. It's llm-d's opinionated way to deploy vLLM pods with the right configuration.
 ```
 
 ## What each component does (and does NOT do)
