@@ -1,97 +1,59 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-qwen3-32b
+  name: vllm-qwen3-cpu
   namespace: vllm-cpu
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vllm-qwen3-32b
+      app: vllm-qwen3-cpu
   template:
     metadata:
       labels:
-        app: vllm-qwen3-32b
-        inference.networking.k8s.io/engine-type: vllm
+        app: vllm-qwen3-cpu
     spec:
       containers:
         - name: vllm
-          image: "vllm/vllm-openai-cpu:latest" # formal images can be found in https://hub.docker.com/r/vllm/vllm-openai-cpu/tags
+          image: vllm/vllm-openai-cpu:latest
           imagePullPolicy: Always
           command: ["python3", "-m", "vllm.entrypoints.openai.api_server"]
           args:
             - "--model"
-            - "Qwen/Qwen3-32B"
+            - "Qwen/Qwen3-0.6B"
             - "--port"
             - "8000"
-            - "--enable-lora"
-            - "--max-loras"
-            - "4"
             - "--max-model-len"
-            - "16384"
+            - "2048"
           env:
-            - name: PORT
-              value: "8000"
-            - name: VLLM_ALLOW_RUNTIME_LORA_UPDATING
-              value: "true"
             - name: VLLM_CPU_KVCACHE_SPACE
-              value: "4"
-            - name: VLLM_PLUGINS
-              value: "lora_filesystem_resolver"
-            - name: VLLM_LORA_RESOLVER_CACHE_DIR
-              value: "/adapters"
+              value: "2"
+            - name: VLLM_CPU_NUM_WORKERS
+              value: "1"
+            - name: VLLM_CPU_OMP_THREADS_BIND
+              value: "all"
           ports:
             - containerPort: 8000
               name: http
               protocol: TCP
-          livenessProbe:
-            failureThreshold: 240
-            httpGet:
-              path: /health
-              port: http
-              scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            successThreshold: 1
-            timeoutSeconds: 1
           readinessProbe:
-            failureThreshold: 600
             httpGet:
               path: /health
               port: http
-              scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            successThreshold: 1
-            timeoutSeconds: 1
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            failureThreshold: 30
           volumeMounts:
-            - mountPath: /data
-              name: data
             - mountPath: /dev/shm
               name: shm
-            - name: adapters
-              mountPath: "/adapters"
-      initContainers:
-        - name: pull-lora
-          image: alpine/git
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              mkdir -p /adapters/small-segment-lora
-              mkdir -p /adapters/cad-fabricator
-              git clone --depth 1 https://huggingface.co/ttt421/nec119-small-segment-lora /adapters/small-segment-lora
-              git clone --depth 1 https://huggingface.co/SriSanth2345/Qwen-1.5B-Tweet-Generations /adapters/cad-fabricator
-          volumeMounts:
-            - name: adapters
-              mountPath: /adapters
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      terminationGracePeriodSeconds: 30
       volumes:
-        - name: data
-          emptyDir: {}
         - name: shm
           emptyDir:
             medium: Memory
-        - name: adapters
-          emptyDir: {}
