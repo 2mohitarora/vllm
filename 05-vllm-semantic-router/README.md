@@ -73,12 +73,12 @@ kubectl get envoyfilter -n gateway-system
 ```
 kubectl get svc -n gateway-system
 
-curl -v http://192.168.139.2/v1/chat/completions \
+curl -v http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "x-model-name: simulator" \
-  -d '{"model":"auto","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
+  -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
 
-curl -v http://192.168.139.2/v1/chat/completions \
+curl -v http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "x-model-name: simulator" \
   -d '{"model":"auto","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'
