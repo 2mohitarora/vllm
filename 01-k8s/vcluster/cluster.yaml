@@ -1,0 +1,15 @@
+experimental:
+  docker:
+    network: "vind-cluster"
+    nodes:
+      - name: worker-1
+    loadBalancer:
+      enabled: true
+    registryProxy:
+      enabled: false
+# Kubernetes version (optional, defaults to v1.34.0)
+# Specify via: controlPlane.distro.k8s.version
+controlPlane:
+  distro:
+    k8s:
+      version: "v1.34.0" # or use image.tag for custom images

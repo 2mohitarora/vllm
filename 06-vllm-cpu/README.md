@@ -10,7 +10,7 @@ kubectl apply -f 00-namespace.yaml
 kubectl apply -f 01-vllm-cpu.yaml
 ```
 
-## Quick test
+## Quick test (direct pod)
 ```
 kubectl get pods -n vllm-cpu -o wide
 
@@ -36,14 +36,18 @@ helm install qwen3-cpu-pool \
   --set inferenceExtension.resources.requests.cpu=50m \
   --set inferenceExtension.resources.requests.memory=128Mi \
   --set inferenceExtension.resources.limits.memory=256Mi
+```
 
+# Verify
+
+```
 kubectl get inferencepool -n vllm-cpu -o yaml
 
 kubectl get svc -n vllm-cpu
 
 ```
 
-## Create HTTPRoute to point to CPU InferencePool
+## Create HTTPRoute pointing to CPU InferencePool
 
 ```
 kubectl apply -f qwen3-cpu-http-route.yaml
