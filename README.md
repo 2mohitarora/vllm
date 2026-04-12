@@ -31,6 +31,3 @@ This simulator pretends to be a vLLM server serving a model called simulator. Th
 Repo: https://github.com/kubernetes-sigs/dra-example-driver
 
 [./07-dra/README.md](./07-dra/README.md)
-
-- Couldn't test because image doesn't support ARM64 : `docker manifest inspect registry.k8s.io/dra-example-driver/dra-example-driver:v0.2.1`
-- Could have tried on Orbstack but Orbstack k8s version < 1.34
