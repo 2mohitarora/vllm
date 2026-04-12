@@ -12,8 +12,8 @@ spec:
   rules:
     - matches:
         - headers:
-            - name: x-model-name
-              value: qwen3-cpu
+            - name: X-SELECTED-MODEL
+              value: Qwen/Qwen3-0.6B
       backendRefs:
         - group: inference.networking.k8s.io
           kind: InferencePool

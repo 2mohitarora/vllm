@@ -26,7 +26,7 @@ Client request (OpenAI-compatible)
 │                     ▼                        ▼                   │
 │  ┌──────────────────────────────────┐  ┌───────────────────┐     │
 │  │ HTTPRoute                        │  │  OpenAI/Anthropic │     │
-│  │ Matches x-model-name header      │  │ Semantic Router   │     │
+│  │ Matches X-SELECTED-MODEL header  │  │ Semantic Router   │     │
 │  │ Selects correct InferencePool    │  │ forwards directl  │     │
 │  └──────┬───────────────┬───────────┘  │ via backend_refs  │     │
 │         │               │              └───────────────────┘     │

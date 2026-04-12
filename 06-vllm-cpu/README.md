@@ -65,6 +65,6 @@ kubectl get svc -n gateway-system
 
 curl -v http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "x-model-name: qwen3-cpu" \
+  -H "X-SELECTED-MODEL: Qwen/Qwen3-0.6B" \
   -d '{"model":"Qwen/Qwen3-0.6B","messages":[{"role":"user","content":"What is 2+2?"}]}'
 ```

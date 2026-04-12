@@ -26,7 +26,6 @@ kubectl -n vllm-simulator port-forward deployment/vllm-simulator 8000:8000
 
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "x-model-name: simulator" \
   -d '{"model":"base-model","messages":[{"role":"user","content":"Hello"}]}'
 ```  
 
@@ -79,7 +78,7 @@ kubectl get svc -n gateway-system
 
 curl -v http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "x-model-name: simulator" \
+  -H "X-SELECTED-MODEL: base-model" \
   -d '{"model":"base-model","messages":[{"role":"user","content":"Hello"}]}'
 
 If you get a streamed response back, you've got the full flow working: Client → Istio Gateway → EPP (smart routing) → Simulator Pod  

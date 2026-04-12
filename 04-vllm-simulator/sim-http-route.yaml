@@ -12,8 +12,8 @@ spec:
   rules:
     - matches:
         - headers:
-            - name: x-model-name
-              value: simulator
+            - name: X-SELECTED-MODEL
+              value: base-model
       backendRefs:
         - group: inference.networking.k8s.io
           kind: InferencePool
