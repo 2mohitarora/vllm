@@ -55,3 +55,14 @@ Client request (OpenAI-compatible)
 │  └──────────────┘ │
 └──────────────────┘
 ```
+
+## What's included
+
+| Component | Runs where | Purpose |
+|---|---|---|
+| **Gateway** | Inside K8s | Gateway API implementation of Istio |
+| **llm-d EPP** | Inside K8s | Inference scheduler — smart pod-level routing |
+| **Inference Simulator** | Inside K8s | Fake vLLM — tests orchestration without GPUs |
+| **DRA manifests** | Inside K8s | DeviceClass + ResourceClaimTemplate — ready for real GPUs |
+| **Semantic Router** | Inside K8s | Intent classifier — routes to best-fit model |
+| **vllm-metal** | Native macOS | Real inference on Apple Metal GPU |
