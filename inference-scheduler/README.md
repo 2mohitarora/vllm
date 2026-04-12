@@ -27,7 +27,15 @@ What this just created:
 
 - An InferencePool custom resource that says "look for pods with label app=llm-d-sim on port 8000"
 - An EPP Deployment (a Go binary) that watches those pods, collects their load/cache metrics, and makes routing decisions
-- A Service for the EPP's gRPC endpoint that the Gateway will call for each incoming request  
+- A Service for the EPP's gRPC endpoint that the Gateway will call for each incoming request 
+
+## Important Note
+
+If you need to add more models, you can install more InferencePools, each with a different selector to match the pods for that model. Respective EPP deployment and service will be created automatically.
+```
+helm install math-pool    oci://registry.k8s.io/.../inferencepool --set ...matchLabels.app=math-vllm
+```
+ 
 
 ## Verify
 
@@ -53,9 +61,19 @@ kubectl get svc -n gateway-system
 
 curl -v http://192.168.139.2/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "x-model-name: simulator" \
   -d '{"model":"simulator","messages":[{"role":"user","content":"Hello"}]}'
 
 If you get a streamed response back, you've got the full flow working: Client → AgentGateway → EPP (smart routing) → Simulator Pod  
+
+Few things to note:
+
+1. The model field in the request body is standard OpenAI API format. Every component in the chain understands it.
+2. When your request hits Istio → EPP, the EPP reads the request body, extracts the model field, and uses it to route. The EPP knows about the simulator pods because the InferencePool's selector matches them (app: llm-d-sim).
+3. EPP also knows what model name the simulator is serving. For example, in our case, the simulator pods are serving the model named "simulator". The simulator was started with --model simulator, so it reports itself as serving a model called simulator. The EPP discovers the model name by scraping each pod's /v1/models endpoint
+4. When you send "model": "simulator": EPP sees the model name matches what the simulator pods advertise → routes to a simulator pod → 200 OK
+5. When you send "model": "non-existent-model": EPP sees no pod advertises "non-existent-model" → returns 404 Not Found
+
 ```
 
 ## Deploy InferenceObjective (Optional)

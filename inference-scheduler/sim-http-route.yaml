@@ -11,9 +11,9 @@ spec:
       namespace: gateway-system
   rules:
     - matches:
-        - path:
-            type: PathPrefix
-            value: /
+        - headers:
+            - name: x-model-name
+              value: simulator
       backendRefs:
         - group: inference.networking.k8s.io
           kind: InferencePool
