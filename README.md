@@ -8,13 +8,13 @@
 
 [./gateway/README.md](./gateway/README.md)
 
-### Install vLLM simulator published by llm-d
+### Install vLLM simulator
 
 This simulator pretends to be a vLLM server serving a model called simulator. They expose /v1/chat/completions, /v1/models, /health, and /metrics exactly like real vLLM would. It is used to test the inference scheduler without needing a real GPU.
 
 [./vllm-simulator/README.md](./vllm-simulator/README.md)
 
-### Install InferenceScheduler
+### Install llm-d InferenceScheduler (extension of the EPP)
 
 [./llm-d-inference-scheduler/README.md](./llm-d-inference-scheduler/README.md)
 

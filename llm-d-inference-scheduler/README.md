@@ -23,8 +23,10 @@ helm install sim-pool \
   --set inferencePool.targetPortNumber=8000 \
   --dependency-update \
   --set provider.name=istio \
-  --version v1.4.0
-
+  --version v1.4.0 \
+  --set inferenceExtension.image.hub=ghcr.io/llm-d \
+  --set inferenceExtension.image.name=llm-d-inference-scheduler \
+  --set inferenceExtension.image.tag=latest
 ```
 
 What this just created:
