@@ -1,6 +1,6 @@
 # Full LLM inference stack on local Kubernetes
 
-**Stack: Istio Gateway (Envoy) with Semantic Router + EPP as ExtProc filters → vLLM pods**
+**Stack: Istio Gateway (Envoy) with Semantic Router + EPP as ExtProc filters → vLLM pods (launched via llm-d ModelService)**
 
 ---
 
