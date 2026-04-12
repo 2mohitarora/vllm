@@ -14,6 +14,8 @@ This example driver advertises simulated GPUs to Kubernetes for your Pods to int
 ```
 cd /tmp
 
+rm -rf dra-example-driver
+
 git clone https://github.com/kubernetes-sigs/dra-example-driver.git
 
 cd dra-example-driver
