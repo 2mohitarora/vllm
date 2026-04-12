@@ -14,12 +14,6 @@ This will take a few minutes — it downloads the ModernBERT classifier model on
 
 There is a known bug in the Helm chart. The mom-pii-classifier model (which contains pii_type_mapping.json) is a separate HuggingFace model repo that the chart references but never downloads. The chart only downloads pii_classifier_modernbert-base_presidio_token_model (the weights), not mom-pii-classifier (the mapping file). That's why we did override pii_model.pii_mapping_path to a wrong file that exists to avoid the error.
 
-# Also patch the service after helm install semantic-router. Without appProtocol: grpc, Istio treats port 50051 as plain TCP/HTTP1.1. But ExtProc requires gRPC, which runs over HTTP/2.
-
-kubectl patch svc semantic-router -n vllm-semantic-router-system --type='json' -p='[
-  {"op": "add", "path": "/spec/ports/0/appProtocol", "value": "grpc"}
-]'
-
 # Verify 
 kubectl get pvc -n vllm-semantic-router-system
 kubectl --namespace vllm-semantic-router-system get pods
