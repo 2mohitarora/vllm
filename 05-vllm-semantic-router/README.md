@@ -3,19 +3,19 @@
 ```
 helm upgrade --install semantic-router \
   oci://ghcr.io/vllm-project/charts/semantic-router \
-  --version 0.2.0 \
+  --version v0.0.0-latest \
   --namespace vllm-semantic-router-system \
   --create-namespace \
-  --set securityContext.readOnlyRootFilesystem=false \
-  --set podSecurityContext.fsGroup=2000 \
-  --set securityContext.runAsUser=0 \
-  --set securityContext.runAsGroup=0 \
-  --set config.classifier.pii_model.pii_mapping_path="models/mom-jailbreak-classifier/jailbreak_type_mapping.json" \
-  -f semantic-router-values.yaml
+  -f https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml \
+  --set persistence.enabled=true \
+  --set persistence.storageClassName=local-path \
+  --set persistence.size=20Gi \
+  --set 'config.providers.models[0].backend_refs[0].endpoint=inference-gateway-istio.gateway-system.svc.cluster.local:80' \
+  --set image.tag=v0.2.0 \
+  --set config.classifier.pii_model.pii_mapping_path="models/mom-jailbreak-classifier/jailbreak_type_mapping.json"
 
-This will take a few minutes — it downloads the ModernBERT classifier model on startup.  
 
-There is a known bug in the Helm chart. The mom-pii-classifier model (which contains pii_type_mapping.json) is a separate HuggingFace model repo that the chart references but never downloads. The chart only downloads pii_classifier_modernbert-base_presidio_token_model (the weights), not mom-pii-classifier (the mapping file). That's why we did override pii_model.pii_mapping_path to a wrong file that exists to avoid the error.
+This will take a few minutes — it downloads bunch of classifier models on startup.  
 ```
 
 # Verify 
@@ -49,14 +49,6 @@ kubectl --namespace vllm-semantic-router-system get pods
 3. Access metrics:
   kubectl -n vllm-semantic-router-system port-forward svc/semantic-router-metrics 9190:9190
   curl http://localhost:9190/metrics
-```
-
-## Explain `semantic-router-values.yaml`
-
-```
- 1. Downloaded this file: https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml 
-
- 2. Changed: inference-gateway-istio.gateway-system.svc.cluster.local:80
 ```
 
 ## Create EnvoyFilter to plug in Semantic Router
