@@ -2,7 +2,7 @@
 
 Inference Extension (EPP) is an upstream Kubernetes SIG project `(kubernetes-sigs/gateway-api-inference-extension)`. It's part of the Gateway API ecosystem, not owned by llm-d. It provides the generic InferencePool CRD and the reference EPP implementation that works with any Envoy-based gateway (Istio, Envoy Gateway, GKE Gateway, NGINX).
 
-Gateway API Inference Extension optimizes self-hosting Generative Models on Kubernetes.
+Gateway API Inference Extension optimizes self-hosting Generative Models on Kubernetes. More details can be found here: https://gateway-api-inference-extension.sigs.k8s.io/ 
 
 The overall resource model focuses on 2 new inference-focused personas and corresponding resources that they are expected to manage:
 
