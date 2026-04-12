@@ -75,7 +75,7 @@ curl -v http://192.168.139.2/v1/chat/completions \
 curl -v http://192.168.139.2/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "x-model-name: simulator" \
-  -d '{"model":"base-model","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'  
+  -d '{"model":"auto","messages":[{"role":"user","content":"What is the derivative of x^3?"}]}'  
 ```
 
 ## What is happening
