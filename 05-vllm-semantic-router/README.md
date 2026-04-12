@@ -6,13 +6,9 @@ helm upgrade --install semantic-router \
   --version v0.0.0-latest \
   --namespace vllm-semantic-router-system \
   --create-namespace \
-  -f https://raw.githubusercontent.com/vllm-project/semantic-router/refs/heads/main/deploy/kubernetes/ai-gateway/semantic-router-values/values.yaml \
-  --set persistence.enabled=true \
-  --set persistence.storageClassName=local-path \
-  --set persistence.size=20Gi \
-  --set 'config.providers.models[0].backend_refs[0].endpoint=inference-gateway-istio.gateway-system.svc.cluster.local:80' \
   --set image.tag=v0.2.0 \
-  --set config.classifier.pii_model.pii_mapping_path="models/mom-jailbreak-classifier/jailbreak_type_mapping.json"
+  --set config.classifier.pii_model.pii_mapping_path=models/pii_classifier_modernbert-base_presidio_token_model/label_mapping.json \
+  -f semantic-router-values.yaml
 
 
 This will take a few minutes — it downloads bunch of classifier models on startup.  
