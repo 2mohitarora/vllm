@@ -63,7 +63,7 @@ kubectl get httproute -n vllm-cpu -o yaml
 # Get Gateway IP
 kubectl get svc -n gateway-system
 
-curl -v http://192.168.139.2/v1/chat/completions \
+curl -v http://192.168.97.254/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "x-model-name: qwen3-cpu" \
   -d '{"model":"Qwen/Qwen3-0.6B","messages":[{"role":"user","content":"What is 2+2?"}]}'
