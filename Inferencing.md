@@ -1,6 +1,6 @@
 # Full LLM inference stack on local Kubernetes
 
-**Stack: vLLM Semantic Router → Istio Gateway (with Inference Extension EPP) → vLLM pods**
+**Stack: Istio Gateway (Envoy) with Semantic Router + EPP as ExtProc filters → vLLM pods**
 
 ---
 
@@ -10,81 +10,118 @@
 Client request (OpenAI-compatible)
     │
     ▼
-┌────────────────────────────────────────────────────┐
-│  vLLM Semantic Router (ExtProc on Envoy)           │
-│  "Which MODEL should answer this?"                 │
-│  • Classifies request intent (math, code, general) │
-│  • Picks self-hosted model or cloud provider       │
-│  • Rewrites model name + injects system prompt     │
-│  • Semantic caching, jailbreak detection, PII      │
-└──────────┬─────────────────────┬───────────────────┘
-           │ self-hosted          │ cloud
-           ▼                      ▼
-┌──────────────────────────┐  ┌──────────────────────┐
-│  Istio Gateway (Envoy)   │  │  OpenAI / Anthropic  │
-│  • TLS, auth, HTTPRoute  │  │  (external APIs)     │
-│  • Routes by model name  │  │  Semantic Router     │
-│  • Standard Gateway API  │  │  forwards directly   │
-└──────────┬───────────────┘  └──────────────────────┘
-           │
-           ▼
-┌────────────────────────────────────────────────────┐
-│  Inference Gateway Extension / EPP (ExtProc)       │
-│  "Which POD of this model?"                        │
-│  • KV-cache-aware endpoint selection               │
-│  • Load-aware, prefix-cache-aware routing          │
-│  • Plugs into same Envoy via ext_proc              │
-│  • One EPP per InferencePool (per model)           │
-│                                                    │
-│  llm-d Inference Scheduler (plugins inside EPP):   │
-│  • Disaggregated prefill/decode routing            │
-│  • LoRA-aware routing                              │
-│  • KV-cache transfer orchestration (NIXL)          │
-└──────────┬─────────────────────────────────────────┘
-           │
-           ▼
-┌────────────────────────────────────────────────────┐
-│  vLLM Model Server pods (via llm-d ModelService)   │
-│  • Actual inference (GPU or CPU)                   │
-│  • OpenAI-compatible API                           │
-│  • Reports metrics to EPP (/metrics)               │
-│  • DRA allocates GPU devices (on real clusters)    │
-│                                                    │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │ vLLM     │ │ vLLM     │ │ vLLM     │           │
-│  │ Qwen3    │ │ Qwen3    │ │ Qwen3    │           │
-│  │ replica 1│ │ replica 2│ │ replica 3│           │
-│  └──────────┘ └──────────┘ └──────────┘           │
-└────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  Istio Gateway (Envoy proxy)                             │
+│  THE single entry point for all traffic                  │
+│  • TLS termination, auth, rate limiting                  │
+│  • HTTPRoute matching (routes by model name / headers)   │
+│  • Runs ExtProc filter chain on every request:           │
+│                                                          │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ ExtProc Filter 1: vLLM Semantic Router             │  │
+│  │ "Which MODEL should answer this?"                  │  │
+│  │  • Classifies request intent (math, code, general) │  │
+│  │  • Rewrites model name + injects system prompt     │  │
+│  │  • Semantic caching, jailbreak detection, PII      │  │
+│  │  • Routes cloud queries to OpenAI/Anthropic        │  │
+│  ├────────────────────────────────────────────────────┤  │
+│  │ ExtProc Filter 2: Inference Scheduler (EPP)        │  │
+│  │ "Which POD of this model?"                         │  │
+│  │  • KV-cache-aware endpoint selection               │  │
+│  │  • Load-aware, prefix-cache-aware routing          │  │
+│  │  • One EPP per InferencePool (per model)           │  │
+│  │  • llm-d plugins: P/D disagg, LoRA-aware routing   │  │
+│  └────────────────────────────────────────────────────┘  │
+└──────────┬──────────────────────────────┬────────────────┘
+           │ self-hosted                   │ cloud
+           ▼                               ▼
+┌────────────────────────────┐  ┌──────────────────────────┐
+│  vLLM Model Server pods    │  │  OpenAI / Anthropic      │
+│  (via llm-d ModelService)  │  │  (external APIs)         │
+│  • Actual inference        │  │  Semantic Router         │
+│  • OpenAI-compatible API   │  │  forwards directly via   │
+│  • Reports metrics to EPP  │  │  backend_refs config     │
+│  • DRA allocates GPUs      │  └──────────────────────────┘
+│                            │
+│  ┌────────┐ ┌────────┐    │
+│  │ vLLM   │ │ vLLM   │    │
+│  │ pod 1  │ │ pod 2  │    │
+│  └────────┘ └────────┘    │
+└────────────────────────────┘
 ```
 
 ## What each component does (and does NOT do)
 
 | Component | What it does | What it does NOT do |
 |---|---|---|
-| **Semantic Router** | Classifies intent, picks model/provider, rewrites request, caching, safety | Does not route to specific pods |
-| **Istio Gateway** | TLS termination, auth, HTTPRoute matching, traffic management | Does not understand models or inference |
-| **EPP / Inference Scheduler** | Picks the optimal pod within an InferencePool based on metrics | Does not pick which model to use |
-| **llm-d** | Orchestration framework — wires Gateway + EPP + vLLM via Helm charts. Adds advanced scheduling plugins (P/D disagg, KV-cache, LoRA-aware) | Does not route to external providers (OpenAI, etc.) |
-| **vLLM** | Runs the actual model, generates tokens, serves OpenAI API | Does not route, schedule, or classify |
-| **DRA** | Allocates GPU devices to pods on real clusters | Does not exist on Mac (no GPU driver) |
+| **Istio Gateway (Envoy)** | Entry point. TLS, auth, HTTPRoutes. Hosts both ExtProc filters. | Does not understand models or make inference decisions |
+| **Semantic Router** | Classifies intent, picks model/provider, rewrites request, caching, safety. Runs as ExtProc filter inside Gateway's Envoy. | Does not route to specific pods. Does not run standalone — needs Envoy. |
+| **EPP / Inference Scheduler** | Picks the optimal pod within an InferencePool based on metrics. Runs as ExtProc filter inside Gateway's Envoy. | Does not pick which model to use. Does not route to external providers. |
+| **llm-d** | Orchestration framework — Helm charts + configs that wire Gateway + EPP + vLLM together. Adds advanced scheduling plugins (P/D disagg, KV-cache, LoRA-aware). | Not a single binary. Does not route to external providers. |
+| **vLLM** | Runs the actual model, generates tokens, serves OpenAI API, reports metrics. | Does not route, schedule, or classify. |
+| **DRA** | Allocates GPU devices to pods using CEL expressions (K8s 1.34+). | Not available on Mac (no GPU driver). |
+
+## Request flow in detail
+
+1. **Client** sends `POST /v1/chat/completions` with `"model": "MoM"` to the Gateway
+2. **Gateway (Envoy)** receives the request and runs the ExtProc filter chain:
+   - **Filter 1 (Semantic Router)**: reads the body, classifies "this is a math query", rewrites `"model": "MoM"` → `"model": "Qwen/Qwen3-0.6B"`, injects math system prompt, returns modified request to Envoy
+   - **Filter 2 (EPP)**: reads the model name, looks up the InferencePool for that model, scores available pods by KV-cache utilization + queue depth + prefix-cache match, picks the best pod, sets `x-gateway-destination-endpoint` header
+3. **Gateway (Envoy)** routes the request to the selected vLLM pod via the HTTPRoute → InferencePool
+4. **vLLM pod** runs inference on the GPU/CPU, streams tokens back through the Gateway to the client
+
+For cloud queries: the Semantic Router classifies and forwards directly to the external API (e.g., `api.openai.com`) via its `backend_refs` config. The EPP is not involved — there are no pods to route between.
+
+## Multiple models setup
+
+Each model gets its own InferencePool + EPP. The Gateway routes between them:
+
+```
+Gateway (Envoy)
+    │
+    ├─ HTTPRoute: model=math    → InferencePool: math-pool    → EPP → vLLM pods (Qwen3-32B)
+    ├─ HTTPRoute: model=code    → InferencePool: code-pool    → EPP → vLLM pods (DeepSeek)
+    └─ HTTPRoute: model=general → InferencePool: general-pool → EPP → vLLM pods (Llama-8B)
+```
+
+| Resource | How many | Why |
+|---|---|---|
+| Gateway | 1 | Single entry point |
+| Semantic Router | 1 | Classifies all requests |
+| HTTPRoute | 1 per model (or 1 with multiple rules) | Maps model names to pools |
+| InferencePool | 1 per model | Defines which pods serve that model |
+| EPP | 1 per pool | Smart routing within that model's replicas |
+| vLLM pods | N per model (scale independently) | Actual inference |
 
 ## What runs where on your Mac
 
 | Component | Runs where | Purpose |
 |---|---|---|
-| **Istio (minimal)** | Inside K8s | Gateway + Envoy proxy |
+| **Istio (minimal profile)** | Inside K8s | istiod + per-Gateway Envoy proxy |
 | **Semantic Router** | Inside K8s | Intent classification via ExtProc |
-| **EPP (per pool)** | Inside K8s | Smart pod-level routing |
+| **EPP (per pool)** | Inside K8s | Smart pod-level routing via ExtProc |
 | **Inference Simulator** | Inside K8s | Fake vLLM — tests orchestration without GPUs |
 | **vLLM CPU** | Inside K8s | Real inference on CPU (slow but real) |
 | **DRA manifests** | Files only | Ready for K8s 1.34+ GPU clusters |
 | **vllm-metal** | Native macOS | Real inference on Apple Metal GPU (optional) |
 
-## Key relationships
+## Key things to remember
 
-- **One Gateway** serves all models (single entry point)
-- **One InferencePool + one EPP** per model (each model gets its own pool)
-- **HTTPRoutes** connect the Gateway to InferencePools (by model name or header)
-- **Semantic Router** sits in front via ExtProc — classifies and routes before the Gateway makes its HTTPRoute decision
-- **llm-d** is not a single binary — it's the orchestration framework (Helm charts + configs) that wires all of the above together
+- **Gateway is always the front door** — nothing bypasses it. Both Semantic Router and EPP are ExtProc filters running inside the Gateway's Envoy.
+- **Semantic Router and EPP are separate pods** — but they're called by the same Envoy process as part of its request processing pipeline.
+- **llm-d is not a runtime component** — it's the orchestration framework (Helm charts, scheduling plugins, configs) that wires everything together.
+- **Cloud routing bypasses EPP** — the Semantic Router forwards to external APIs directly. EPP only handles self-hosted pods.
+- **One InferencePool + one EPP per model** — each model's replicas are managed independently.
+
+## Setup checklist for a fresh cluster
+
+1. Install Istio (minimal profile) with `ENABLE_GATEWAY_API_INFERENCE_EXTENSION=true`
+2. Install Gateway API CRDs + Inference Extension CRDs
+3. Create Gateway with `infrastructure.annotations: traffic.sidecar.istio.io/excludeOutboundPorts: "50051"`
+4. Deploy vLLM pods (or simulator for testing)
+5. Install InferencePool + EPP per model (Helm chart)
+6. Create HTTPRoutes pointing to InferencePools
+7. Install Semantic Router (Helm chart + PII path fix + StorageClass override)
+8. Patch Semantic Router service: `appProtocol: grpc` on port 50051 (not needed if using `excludeOutboundPorts`)
+9. Apply EnvoyFilter for Semantic Router ExtProc (unique name, INSERT_FIRST, 60s timeout)
+10. Apply DRA manifests (K8s 1.34+ only)
