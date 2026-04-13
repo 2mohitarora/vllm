@@ -25,6 +25,8 @@ spec:
             - "8000"
             - "--max-model-len"
             - "2048"
+            - "--disable-access-log-for-endpoints"
+            - "/health,/metrics,/ping"
           env:
             - name: VLLM_CPU_KVCACHE_SPACE
               value: "2"
