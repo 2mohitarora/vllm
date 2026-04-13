@@ -4,7 +4,7 @@
 kubectl apply -f 00-namespace.yaml
 ```
 
-## Install fake vLLM
+## Install vLLM serving Qwen/Qwen3-0.6B on cpu
 
 ```
 kubectl apply -f 01-vllm-cpu.yaml
@@ -21,7 +21,7 @@ curl http://localhost:8000/v1/chat/completions \
   -d '{"model":"Qwen/Qwen3-0.6B","messages":[{"role":"user","content":"What is 2+2?"}]}'
 ```  
 
-## Create inference pool and deploy EPP for cpu model
+## Create inference pool and deploy EPP for Qwen/Qwen3-0.6B on cpu model
 
 ```
 helm install qwen3-cpu-pool \
