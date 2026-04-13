@@ -26,16 +26,19 @@ helm install dra-example-driver deployments/helm/dra-example-driver \
   --namespace dra-example-driver \
   --create-namespace \
   --set driverName="nvidia-gpu"
+```
 
 # Verify
+
+```
 kubectl get pod -n dra-example-driver -o wide
 
-kubectl get resourceslices (Automatically created by the driver, Cluster Scoped)
-
+# Automatically created by the driver, Cluster Scoped
+kubectl get resourceslices 
 kubectl get resourceslices -o yaml
 
-kubectl get deviceclass (Automatically created by the driver, Cluster Scoped : Defines hardware categories)
-
+# Automatically created by the driver, Cluster Scoped : Defines hardware categories
+kubectl get deviceclass 
 kubectl get deviceclass -o yaml
 ```
 
