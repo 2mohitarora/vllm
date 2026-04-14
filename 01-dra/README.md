@@ -62,6 +62,9 @@ kubectl describe pod dra-test-pod
 ```
 
 ## Real world scenarios
+  
+![Samples](../assets/samples.png)
+
 ```
 Cover dra-manifests-production.yaml
 ```
