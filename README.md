@@ -31,3 +31,49 @@ This simulator pretends to be a vLLM server serving a model called simulator. Th
 ### Add another model to the mix running on vllm (CPU)
 
 [./06-vllm-cpu/README.md](./06-vllm-cpu/README.md)
+
+---
+
+## Training (parallel stack, same constructs — K8s + DRA)
+
+See [./Training.md](./Training.md) for the architecture overview. The numbered directories below mirror the inferencing walkthrough and reuse `00-k8s/` and `01-dra/`.
+
+### Install Kueue (multi-tenant queues + quotas)
+
+[./07-kueue/README.md](./07-kueue/README.md)
+
+### Install Kubeflow Trainer + ClusterTrainingRuntimes
+
+[./08-kubeflow-trainer/README.md](./08-kubeflow-trainer/README.md)
+
+### Shared training storage (HF cache + checkpoints)
+
+[./09-training-storage/README.md](./09-training-storage/README.md)
+
+### Submit a fake TrainJob (training equivalent of vllm-simulator)
+
+[./10-trainjob-simulator/README.md](./10-trainjob-simulator/README.md)
+
+### Submit a real HF LoRA fine-tune on CPU (hands off to 06-vllm-cpu)
+
+[./11-trainjob-hf-cpu/README.md](./11-trainjob-hf-cpu/README.md)
+
+### Install MLflow (experiment tracking + model registry)
+
+[./12-mlflow/README.md](./12-mlflow/README.md)
+
+### Install Volcano (gang scheduling + topology-aware GPU packing)
+
+[./13-volcano/README.md](./13-volcano/README.md)
+
+### Install Argo Workflows (pipeline DAG: prep → train → eval → register → promote)
+
+[./14-argo-workflows/README.md](./14-argo-workflows/README.md)
+
+### Eval gate (mandatory governance step before Production promotion)
+
+[./15-eval-gate/README.md](./15-eval-gate/README.md)
+
+### End-to-end training demo (scripted walk-through)
+
+[./demo-training-e2e.md](./demo-training-e2e.md)
