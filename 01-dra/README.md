@@ -20,6 +20,7 @@ git clone https://github.com/kubernetes-sigs/dra-example-driver.git
 
 cd dra-example-driver
 
+# Only if you are building the driver from source
 ./demo/build-driver.sh
 
 helm install dra-example-driver deployments/helm/dra-example-driver \
