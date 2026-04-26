@@ -8,7 +8,7 @@ kubectl get crd | grep gateway
 
 ## Install istio
 ```
-istioctl install --set profile=minimal --set values.pilot.env.ENABLE_GATEWAY_API_INFERENCE_EXTENSION=true
+istioctl install --set profile=minimal --set values.pilot.env.ENABLE_GATEWAY_API_INFERENCE_EXTENSION=true -y
 
 # Check pods
 kubectl get pods -n istio-system
